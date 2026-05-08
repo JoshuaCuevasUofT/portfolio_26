@@ -34,12 +34,11 @@ html, body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
   color: var(--text-primary);
   text-align: center;
   padding: 2rem;
   box-sizing: border-box;
+  overflow-y: auto;
 }
 
 /* Hero section */
@@ -213,4 +212,37 @@ html, body {
   .feature p {
     font-size: 0.9rem;
   }
+}
+
+/* Layout styles */
+.layout {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+}
+
+.section {
+  margin: var(--spacing-2xl) 0;
+  padding: var(--spacing-xl);
+  background-color: rgba(29, 30, 43, 0.7);
+  border-radius: var(--radius-2xl);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 20px 40px var(--shadow-dark);
+}
+
+/* Hero styles */
+.hero {
+  padding: var(--spacing-xl);
+  background-color: rgba(29, 30, 43, 0.7);
+  border-radius: var(--radius-2xl);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 20px 40px var(--shadow-dark);
+}
+
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
 }
