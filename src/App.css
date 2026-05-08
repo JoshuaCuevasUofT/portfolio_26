@@ -177,6 +177,37 @@ html, body {
   color: var(--text-primary);
 }
 
+/* Project Grid styles */
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: var(--spacing-xl);
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-md);
+}
+
+.project-grid-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.project-grid-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  background-color: rgba(29, 30, 43, 0.5);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-light);
+  backdrop-filter: blur(10px);
+  min-height: 300px;
+  margin: var(--spacing-xl) auto;
+  max-width: 800px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .title {

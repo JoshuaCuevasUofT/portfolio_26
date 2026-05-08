@@ -19,6 +19,10 @@ const iconMap: Record<string, React.ComponentType> = {
   FaGitAlt: FaIcons.FaGitAlt,
   FaDocker: FaIcons.FaDocker,
   FaAws: FaIcons.FaAws,
+  FaChartLine: FaIcons.FaChartLine,
+  FaChartBar: FaIcons.FaChartBar,
+  FaChartPie: FaIcons.FaChartPie,
+  FaCode: FaIcons.FaCode,
 
   // Si icons
   SiTypescript: SiIcons.SiTypescript,
@@ -28,11 +32,7 @@ const iconMap: Record<string, React.ComponentType> = {
   SiTensorflow: SiIcons.SiTensorflow,
   SiPytorch: SiIcons.SiPytorch,
   SiExpress: SiIcons.SiExpress,
-  SiD3Dotjs: SiIcons.SiD3Dotjs,
-  SiTableau: SiIcons.SiTableau,
-  SiPowerbi: SiIcons.SiPowerbi,
   SiJupyter: SiIcons.SiJupyter,
-  SiVisualstudiocode: SiIcons.SiVisualstudiocode,
   SiFigma: SiIcons.SiFigma,
   SiPostgresql: SiIcons.SiPostgresql,
   SiMongodb: SiIcons.SiMongodb,
@@ -64,7 +64,7 @@ const Skills: React.FC = () => {
             return (
               <div key={category} className="skills-category">
                 <div className="category-header">
-                  {IconComponent && <IconComponent className="category-icon" />}
+                  {IconComponent && <span className="category-icon"><IconComponent /></span>}
                   <Text variant="h3" color="primary">
                     {category}
                   </Text>

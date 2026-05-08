@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import './App.css'
-import Button from './components/Button'
 import Text from './components/Text'
-import ProjectCard from './components/ProjectCard'
+import ProjectGrid from './components/ProjectGrid'
 import TagFilter from './components/TagFilter'
 import Layout from './components/Layout'
 import { projects } from './data/projects'
@@ -95,52 +94,32 @@ function App() {
         <main>
           <Layout>
 
-          {/* Tag Filter demonstration */}
-          <section style={{
-            maxWidth: '800px',
-            margin: 'var(--spacing-2xl) auto',
-            padding: '0 var(--spacing-md)'
-          }}>
+          {/* Portfolio Projects Section */}
+          <section className="section">
             <Text variant="h2" color="accent" align="center" style={{ marginBottom: 'var(--spacing-lg)' }}>
-              Tag Filter Demo (Issue #005)
+              Portfolio Projects
             </Text>
-            <TagFilter
-              selectedTags={selectedTags}
-              onTagSelect={handleTagSelect}
-              onTagDeselect={handleTagDeselect}
-            />
-            <Text variant="body" color="secondary" align="center" style={{ marginTop: 'var(--spacing-sm)' }}>
-              {selectedTags.length === 0 ? 'No tags selected (showing no projects)' :
-               selectedTags.length === allTags.length ? 'All tags selected (showing all projects)' :
-               `Showing projects with tags: ${selectedTags.join(', ')}`}
+            <Text variant="body" color="secondary" align="center" style={{ marginBottom: 'var(--spacing-xl)' }}>
+              Filter projects by skill tags to find relevant work samples.
             </Text>
-          </section>
 
-          {/* ProjectCard demonstration */}
-          <section style={{
-            maxWidth: '800px',
-            margin: 'var(--spacing-2xl) auto',
-            padding: '0 var(--spacing-md)'
-          }}>
-            <Text variant="h2" color="accent" align="center" style={{ marginBottom: 'var(--spacing-lg)' }}>
-              Project Card Demo (Issue #004)
-            </Text>
-            <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-              {filteredProjects.length === 0 ? (
-                <Text variant="body" color="secondary" align="center">
-                  No projects match the selected tags.
-                </Text>
-              ) : (
-                filteredProjects.map((project) => (
-                  <div key={project.id} style={{ marginBottom: 'var(--spacing-lg)' }}>
-                    <ProjectCard
-                      project={project}
-                      onClick={() => console.log(`Clicked project: ${project.title}`)}
-                    />
-                  </div>
-                ))
-              )}
+            <div style={{ maxWidth: '800px', margin: '0 auto var(--spacing-xl)' }}>
+              <TagFilter
+                selectedTags={selectedTags}
+                onTagSelect={handleTagSelect}
+                onTagDeselect={handleTagDeselect}
+              />
+              <Text variant="small" color="secondary" align="center" style={{ marginTop: 'var(--spacing-sm)' }}>
+                {selectedTags.length === 0 ? 'No tags selected (showing no projects)' :
+                 selectedTags.length === allTags.length ? 'All tags selected (showing all projects)' :
+                 `Showing ${filteredProjects.length} project${filteredProjects.length !== 1 ? 's' : ''} with tags: ${selectedTags.join(', ')}`}
+              </Text>
             </div>
+
+            <ProjectGrid
+              projects={filteredProjects}
+              onProjectClick={(project) => console.log(`Clicked project: ${project.title}`)}
+            />
           </section>
         </Layout>
         </main>
