@@ -7,7 +7,7 @@ import ProjectCard from './components/ProjectCard'
 import TagFilter from './components/TagFilter'
 import { projects } from './data/projects'
 import { filterProjects } from './utils/filterProjects'
-import { Tag } from './types/project'
+import { type Tag } from './types/project'
 
 // Import Vanta.js - it will register itself on window.VANTA
 import 'vanta/dist/vanta.waves.min'

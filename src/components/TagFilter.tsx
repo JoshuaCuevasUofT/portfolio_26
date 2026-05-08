@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tag } from '../types/project';
+import { type Tag } from '../types/project';
 
 interface TagFilterProps {
   selectedTags: Tag[];
