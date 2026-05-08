@@ -11,15 +11,15 @@ Successfully completed all acceptance criteria for Issue #1: "Setup Ocean Backgr
 ## Acceptance Criteria Status
 
 ### ✅ Vite + React + TypeScript project initialized
-Command: `npm create vite@latest portfolio-v2 -- --template react-ts`
-- Project created in `/portfolio-v2` directory
+Command: `npm create vite@latest portfolio_26 -- --template react-ts`
+- Project created in `/portfolio_26` directory
 - All base dependencies installed
 
 ### ✅ Vanta.js dependency installed
 Command: `npm install vanta`
 - Version: vanta@0.5.24
 
-### ✅ Three.js peer dependency installed  
+### ✅ Three.js peer dependency installed
 Command: `npm install three`
 - Version: three@0.184.0
 
@@ -52,14 +52,13 @@ Command: `npm install three`
 
 ## How to run
 ```bash
-cd portfolio-v2
 npm install
 npm run dev
 ```
 
 ## Project Structure
 ```
-portfolio-v2/
+portfolio_26/
 ├── src/
 │   ├── App.tsx          # Main component with Vanta.js
 │   ├── App.css          # Styling with dark theme
