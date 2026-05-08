@@ -1,10 +1,13 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import './App.css'
 import Button from './components/Button'
 import Text from './components/Text'
 import ProjectCard from './components/ProjectCard'
+import TagFilter from './components/TagFilter'
 import { projects } from './data/projects'
+import { filterProjects } from './utils/filterProjects'
+import { type Tag } from './types/project'
 
 // Import Vanta.js - it will register itself on window.VANTA
 import 'vanta/dist/vanta.waves.min'
@@ -12,6 +15,18 @@ import 'vanta/dist/vanta.waves.min'
 function App() {
   const vantaRef = useRef<HTMLDivElement>(null)
   const vantaEffect = useRef<any>(null)
+  const allTags: Tag[] = ['Data Science (ML)', 'Data Analysis', 'Quantitative Research', 'Data Engineering', 'Dashboards']
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(allTags)
+
+  const handleTagSelect = (tag: Tag) => {
+    setSelectedTags(prev => [...prev, tag])
+  }
+
+  const handleTagDeselect = (tag: Tag) => {
+    setSelectedTags(prev => prev.filter(t => t !== tag))
+  }
+
+  const filteredProjects = filterProjects(projects, selectedTags)
 
   useEffect(() => {
     if (!vantaEffect.current && vantaRef.current) {
@@ -155,6 +170,27 @@ function App() {
             </div>
           </section>
 
+          {/* Tag Filter demonstration */}
+          <section style={{
+            maxWidth: '800px',
+            margin: 'var(--spacing-2xl) auto',
+            padding: '0 var(--spacing-md)'
+          }}>
+            <Text variant="h2" color="accent" align="center" style={{ marginBottom: 'var(--spacing-lg)' }}>
+              Tag Filter Demo (Issue #005)
+            </Text>
+            <TagFilter
+              selectedTags={selectedTags}
+              onTagSelect={handleTagSelect}
+              onTagDeselect={handleTagDeselect}
+            />
+            <Text variant="body" color="secondary" align="center" style={{ marginTop: 'var(--spacing-sm)' }}>
+              {selectedTags.length === 0 ? 'No tags selected (showing no projects)' :
+               selectedTags.length === allTags.length ? 'All tags selected (showing all projects)' :
+               `Showing projects with tags: ${selectedTags.join(', ')}`}
+            </Text>
+          </section>
+
           {/* ProjectCard demonstration */}
           <section style={{
             maxWidth: '800px',
@@ -165,14 +201,20 @@ function App() {
               Project Card Demo (Issue #004)
             </Text>
             <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-              {projects.map((project) => (
-                <div key={project.id} style={{ marginBottom: 'var(--spacing-lg)' }}>
-                  <ProjectCard
-                    project={project}
-                    onClick={() => console.log(`Clicked project: ${project.title}`)}
-                  />
-                </div>
-              ))}
+              {filteredProjects.length === 0 ? (
+                <Text variant="body" color="secondary" align="center">
+                  No projects match the selected tags.
+                </Text>
+              ) : (
+                filteredProjects.map((project) => (
+                  <div key={project.id} style={{ marginBottom: 'var(--spacing-lg)' }}>
+                    <ProjectCard
+                      project={project}
+                      onClick={() => console.log(`Clicked project: ${project.title}`)}
+                    />
+                  </div>
+                ))
+              )}
             </div>
           </section>
         </main>
