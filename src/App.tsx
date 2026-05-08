@@ -5,7 +5,8 @@ import Text from './components/Text'
 import ProjectGrid from './components/ProjectGrid'
 import TagFilter from './components/TagFilter'
 import Layout from './components/Layout'
-import ProjectDetailsModal from './components/ProjectDetailsModal'
+import { lazy, Suspense } from 'react'
+const ProjectDetailsModal = lazy(() => import('./components/ProjectDetailsModal'))
 import { projects } from './data/projects'
 import { filterProjects } from './utils/filterProjects'
 import { type Tag, type Project } from './types/project'
@@ -145,10 +146,12 @@ function App() {
           </section>
         </Layout>
         </main>
-        <ProjectDetailsModal
-          project={selectedProject}
-          onClose={handleCloseModal}
-        />
+        <Suspense fallback={null}>
+          <ProjectDetailsModal
+            project={selectedProject}
+            onClose={handleCloseModal}
+          />
+        </Suspense>
         <footer className="footer">
           <Text variant="small" color="accent" align="center">
             Move your mouse around to interact with the animated waves!

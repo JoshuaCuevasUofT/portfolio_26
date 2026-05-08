@@ -6,7 +6,11 @@ export default defineConfig({
   plugins: [react()],
   build: {
     minify: 'terser',
+    sourcemap: false,
+    cssMinify: true,
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
+      treeshake: true,
       output: {
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
