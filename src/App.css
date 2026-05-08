@@ -344,8 +344,55 @@ html, body {
 }
 
 .hero-content {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
+}
+
+.hero-profile {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-xl);
+}
+
+.hero-image-container {
+  flex-shrink: 0;
+}
+
+.hero-image {
+  width: 200px;
+  height: 200px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 3px solid var(--border-accent);
+  box-shadow: 0 10px 30px var(--shadow-dark);
+}
+
+.hero-text {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .hero-profile {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-lg);
+  }
+
+  .hero-text {
+    text-align: center;
+  }
+
+  .hero-text h1,
+  .hero-text h2,
+  .hero-text p {
+    text-align: center;
+  }
+
+  .hero-image {
+    width: 160px;
+    height: 160px;
+  }
 }
 
 /* Project Details Modal */
