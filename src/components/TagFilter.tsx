@@ -34,7 +34,7 @@ const TagFilter: React.FC<TagFilterProps> = ({ selectedTags, onTagSelect, onTagD
         {onRefresh && (
           <button
             className={`refresh-button ${selectedTags.length === 0 ? 'disabled' : ''}`}
-            onClick={selectedTags.length === 0 ? undefined : onRefresh}
+            onClick={onRefresh}
             disabled={selectedTags.length === 0}
             aria-label="Reset filters"
           >

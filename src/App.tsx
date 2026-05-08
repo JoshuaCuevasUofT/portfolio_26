@@ -31,7 +31,7 @@ function App() {
   }
 
   const handleRefresh = () => {
-    setSelectedTags(allTags)
+    setSelectedTags([])
   }
 
   const handleProjectClick = (project: Project) => {
