@@ -1,4 +1,4 @@
-import { type Project } from '../types/project';
+import { type Project, type Tag } from '../types/project';
 
 // Static project data (extracted previously from markdown)
 const eventDrivenBacktest: Project = {
@@ -367,7 +367,7 @@ export function getProjectById(id: string): Project | undefined {
 }
 
 export function getProjectsByTag(tag: string): Project[] {
-  return projects.filter(project => project.tags.includes(tag as any));
+  return projects.filter(project => project.tags.includes(tag as Tag));
 }
 
 // Export all unique tags
