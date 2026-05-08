@@ -1,4 +1,4 @@
-import { Project } from '../types/project.ts';
+import { Project } from '../types/project';
 
 /**
  * Sort projects chronologically (most recent first)

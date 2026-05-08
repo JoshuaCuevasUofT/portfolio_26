@@ -21,3 +21,5 @@ export interface Project {
   links?: ProjectLink[];
   date: string; // ISO format for chronological ordering
 }
+
+export { Project, Tag, ProjectLink };

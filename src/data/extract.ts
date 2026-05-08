@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { Project, Tag } from '../types/project.ts';
+import { Project, Tag } from '../types/project';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
