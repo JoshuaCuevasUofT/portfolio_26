@@ -39,7 +39,7 @@ function App() {
           minWidth: 200.00,
           scale: 1.00,
           scaleMobile: 1.00,
-          color: 0x3a3a4a,  // Dark blue-gray for subtle background waves
+          color: 0x1d1e2b,  // Dark blue-gray for subtle background waves
           shininess: 30.00,  // Default shininess
           waveHeight: 15.00,  // Default wave height
           waveSpeed: 1.00,    // Default speed
