@@ -3,6 +3,7 @@ import '../styles/theme.css';
 import Hero from './Hero';
 import TagFilter from './TagFilter';
 import Text from './Text';
+import Skills from './Skills';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -28,14 +29,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           Placeholder for project grid display
         </Text>
       </section>
-      <section className="section skills-placeholder">
-        <Text variant="h2" color="accent" align="center">
-          Skills Visualization
-        </Text>
-        <Text variant="body" color="secondary" align="center">
-          Placeholder for skills visualization
-        </Text>
-      </section>
+      <Skills />
       <section className="section contact-placeholder">
         <Text variant="h2" color="accent" align="center">
           Contact
