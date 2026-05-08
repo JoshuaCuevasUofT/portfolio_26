@@ -1,4 +1,4 @@
-import { Project } from '../types/project';
+import { Project } from '../types/project.ts';
 import { extractEventDrivenBacktest } from './extract';
 
 // Extract and prepare project data
