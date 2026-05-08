@@ -5,6 +5,7 @@ import Button from './components/Button'
 import Text from './components/Text'
 import ProjectCard from './components/ProjectCard'
 import TagFilter from './components/TagFilter'
+import Layout from './components/Layout'
 import { projects } from './data/projects'
 import { filterProjects } from './utils/filterProjects'
 import { type Tag } from './types/project'
@@ -92,83 +93,7 @@ function App() {
       <div ref={vantaRef} className="vanta-background"></div>
       <div className="content">
         <main>
-          <section className="hero-section">
-            <Text variant="h1" color="accent" align="center">
-              Portfolio V2
-            </Text>
-            <Text variant="body" color="secondary" align="center">
-              Interactive wave background with Vanta.js
-            </Text>
-
-            {/* Theme color demonstration */}
-            <div style={{
-              display: 'flex',
-              gap: 'var(--spacing-md)',
-              marginTop: 'var(--spacing-xl)',
-              marginBottom: 'var(--spacing-xl)',
-              justifyContent: 'center',
-              flexWrap: 'wrap'
-            }}>
-              <div style={{
-                width: '60px',
-                height: '60px',
-                backgroundColor: 'var(--color-1)',
-                borderRadius: 'var(--radius-md)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--text-primary)',
-                fontWeight: 'bold'
-              }}>#1</div>
-              <div style={{
-                width: '60px',
-                height: '60px',
-                backgroundColor: 'var(--color-2)',
-                borderRadius: 'var(--radius-md)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--text-primary)',
-                fontWeight: 'bold'
-              }}>#2</div>
-              <div style={{
-                width: '60px',
-                height: '60px',
-                backgroundColor: 'var(--color-3)',
-                borderRadius: 'var(--radius-md)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--text-primary)',
-                fontWeight: 'bold'
-              }}>#3</div>
-            </div>
-
-            <div className="features">
-              <div className="feature">
-                <h3>🌊 Animated Waves</h3>
-                <p>Real-time wave simulation with mouse interaction</p>
-              </div>
-              <div className="feature">
-                <h3>🎨 Dark Theme</h3>
-                <p>CSS custom properties with accent colors</p>
-                <div style={{ marginTop: 'var(--spacing-sm)' }}>
-                  <Button variant="primary" size="small" onClick={() => console.log('Primary clicked')}>
-                    Primary Button
-                  </Button>
-                </div>
-              </div>
-              <div className="feature">
-                <h3>⚡ React + TypeScript</h3>
-                <p>Modern frontend stack with Vite</p>
-                <div style={{ marginTop: 'var(--spacing-sm)' }}>
-                  <Button variant="secondary" size="small" onClick={() => console.log('Secondary clicked')}>
-                    Secondary Button
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </section>
+          <Layout>
 
           {/* Tag Filter demonstration */}
           <section style={{
@@ -217,6 +142,7 @@ function App() {
               )}
             </div>
           </section>
+        </Layout>
         </main>
         <footer className="footer">
           <Text variant="small" color="accent" align="center">
