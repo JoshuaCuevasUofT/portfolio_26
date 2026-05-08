@@ -157,9 +157,11 @@ body {
   color: var(--text-primary);
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px var(--shadow-accent);
+@media (hover: hover) {
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--shadow-accent);
+  }
 }
 
 .btn-primary:focus {
@@ -173,9 +175,13 @@ body {
   border: 1px solid var(--border-light);
 }
 
-.btn-secondary:hover {
-  background-color: var(--hover-bg);
-  border-color: var(--border-accent);
+@media (hover: hover) {
+  .btn-secondary:hover {
+    background-color: var(--hover-bg);
+    border-color: var(--border-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--shadow-medium);
+  }
 }
 
 /* Card styles */
@@ -184,13 +190,15 @@ body {
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-light);
   padding: var(--spacing-lg);
-  transition: all var(--transition-medium);
+  transition: all var(--transition-fast);
 }
 
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px var(--shadow-medium);
-  border-color: var(--border-accent);
+@media (hover: hover) {
+  .card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 15px 35px var(--shadow-dark);
+    border-color: var(--border-accent);
+  }
 }
 
 /* Typography */
@@ -283,11 +291,13 @@ body {
   cursor: default;
 }
 
-.skill-item:hover {
-  transform: translateY(-5px);
-  border-color: var(--border-accent);
-  box-shadow: 0 10px 20px var(--shadow-dark);
-  background: var(--hover-bg);
+@media (hover: hover) {
+  .skill-item:hover {
+    transform: translateY(-5px);
+    border-color: var(--border-accent);
+    box-shadow: 0 10px 20px var(--shadow-dark);
+    background: var(--hover-bg);
+  }
 }
 
 .skill-icon {
