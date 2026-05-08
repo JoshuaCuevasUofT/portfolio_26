@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { type Project } from '../types/project';
 import Text from './Text';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface ProjectDetailsModalProps {
   project: Project | null;
@@ -9,6 +11,8 @@ interface ProjectDetailsModalProps {
 
 const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ project, onClose }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -23,6 +27,15 @@ const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ project, onCl
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [selectedImageIndex, onClose]);
+
+  // Clean up copy timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   if (!project) return null;
 
@@ -107,21 +120,57 @@ const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ project, onCl
               Code Snippets
             </Text>
             {project.codeSnippets.map((snippet, index) => (
-              <pre
-                key={index}
-                style={{
-                  backgroundColor: 'var(--hover-bg)',
-                  color: 'var(--text-accent)',
-                  padding: 'var(--spacing-md)',
-                  borderRadius: 'var(--radius-md)',
-                  overflowX: 'auto',
-                  fontSize: '0.875rem',
-                  marginBottom: 'var(--spacing-sm)',
-                  border: '1px solid var(--border-accent)',
-                }}
-              >
-                <code>{snippet}</code>
-              </pre>
+              <div key={index} className="code-block">
+                <div className="code-block-header">
+                  <span>python</span>
+                  <button
+                    className="code-block-copy-btn"
+                    onClick={() => {
+                      try {
+                        navigator.clipboard.writeText(snippet);
+                        setCopiedIndex(index);
+
+                        // Clear any existing timeout
+                        if (copyTimeoutRef.current) {
+                          clearTimeout(copyTimeoutRef.current);
+                        }
+
+                        // Set timeout to reset copied state after 2 seconds
+                        copyTimeoutRef.current = setTimeout(() => {
+                          setCopiedIndex(null);
+                        }, 2000);
+                      } catch (err) {
+                        console.error('Failed to copy code:', err);
+                        // Optional: Show error message to user
+                      }
+                    }}
+                    title="Copy code"
+                  >
+                    {copiedIndex === index ? 'Copied!' : 'Copy'}
+                  </button>
+                </div>
+                <SyntaxHighlighter
+                  language="python"
+                  style={vscDarkPlus}
+                  showLineNumbers={true}
+                  showInlineLineNumbers={false}
+                  lineNumberStyle={{ minWidth: '3.5em' }}
+                  customStyle={{
+                    margin: 0,
+                    padding: 'var(--spacing-md)',
+                    borderRadius: '0 0 var(--radius-md) var(--radius-md)',
+                    fontSize: '0.875rem',
+                    textAlign: 'left',
+                  }}
+                  codeTagProps={{
+                    style: {
+                      fontFamily: 'source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace',
+                    }
+                  }}
+                >
+                  {snippet}
+                </SyntaxHighlighter>
+              </div>
             ))}
           </div>
         )}
