@@ -1,12 +1,12 @@
 # Portfolio Website V2 - Product Requirements Document
 
-**Date**: 2026-05-07  
-**Owner**: Joshua Joel Cuevas  
+**Date**: 2026-05-07
+**Owner**: Joshua Joel Cuevas
 **Status**: Approved for Implementation
 
 ## Problem Statement
 
-The user (Joshua Joel Cuevas) needs to update their outdated portfolio website to secure data science, data analyst, and quantitative research/trader roles. The current portfolio consists of randomly scattered Markdown files and images that are difficult to navigate and lack professional presentation. The user wants a modern, interactive website with ocean-themed visual effects, professional dark theme, and interactive elements to showcase their projects effectively to potential employers.
+The user (Joshua Joel Cuevas) needs to update their outdated portfolio website to secure data science, data analyst, and quantitative research/trader roles. The current portfolio consists of randomly scattered Markdown files and images that are difficult to navigate and lack professional presentation, I've moved all the random things into a folder called "from_old_portfolio." The user wants a modern, interactive website with ocean-themed visual effects, professional dark theme, and interactive elements to showcase their projects effectively to potential employers.
 
 ## Solution
 
