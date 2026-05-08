@@ -5,9 +5,10 @@ import Text from './components/Text'
 import ProjectGrid from './components/ProjectGrid'
 import TagFilter from './components/TagFilter'
 import Layout from './components/Layout'
+import ProjectDetailsModal from './components/ProjectDetailsModal'
 import { projects } from './data/projects'
 import { filterProjects } from './utils/filterProjects'
-import { type Tag } from './types/project'
+import { type Tag, type Project } from './types/project'
 
 // Import Vanta.js - it will register itself on window.VANTA
 import 'vanta/dist/vanta.waves.min'
@@ -17,6 +18,7 @@ function App() {
   const vantaEffect = useRef<any>(null)
   const allTags: Tag[] = ['Data Science (ML)', 'Data Analysis', 'Quantitative Research', 'Data Engineering', 'Dashboards']
   const [selectedTags, setSelectedTags] = useState<Tag[]>(allTags)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
   const handleTagSelect = (tag: Tag) => {
     setSelectedTags(prev => [...prev, tag])
@@ -24,6 +26,14 @@ function App() {
 
   const handleTagDeselect = (tag: Tag) => {
     setSelectedTags(prev => prev.filter(t => t !== tag))
+  }
+
+  const handleProjectClick = (project: Project) => {
+    setSelectedProject(project)
+  }
+
+  const handleCloseModal = () => {
+    setSelectedProject(null)
   }
 
   const filteredProjects = filterProjects(projects, selectedTags)
@@ -118,11 +128,15 @@ function App() {
 
             <ProjectGrid
               projects={filteredProjects}
-              onProjectClick={(project) => console.log(`Clicked project: ${project.title}`)}
+              onProjectClick={handleProjectClick}
             />
           </section>
         </Layout>
         </main>
+        <ProjectDetailsModal
+          project={selectedProject}
+          onClose={handleCloseModal}
+        />
         <footer className="footer">
           <Text variant="small" color="accent" align="center">
             Move your mouse around to interact with the animated waves!
