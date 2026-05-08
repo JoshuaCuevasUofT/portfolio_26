@@ -1,11 +1,10 @@
-/* Reset default margins and set dark background */
+/* Reset default margins */
 html, body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #1d1e2b;
 }
 
 /* Main app container */
@@ -24,7 +23,7 @@ html, body {
   width: 100%;
   height: 100%;
   z-index: 0;
-  background-color: #1d1e2b; /* Fallback background */
+  background-color: var(--bg-primary); /* Fallback background */
 }
 
 /* Content overlay */
@@ -37,7 +36,7 @@ html, body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: white;
+  color: var(--text-primary);
   text-align: center;
   padding: 2rem;
   box-sizing: border-box;
@@ -46,28 +45,28 @@ html, body {
 /* Hero section */
 .hero-section {
   max-width: 800px;
-  padding: 2rem;
+  padding: var(--spacing-xl);
   background-color: rgba(29, 30, 43, 0.7);
-  border-radius: 20px;
+  border-radius: var(--radius-2xl);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 20px 40px var(--shadow-dark);
 }
 
 .title {
   font-size: 3.5rem;
   font-weight: 700;
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, #6a98f0, #8fd3f4);
+  background: var(--gradient-accent);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 4px 8px var(--shadow-light);
 }
 
 .subtitle {
   font-size: 1.5rem;
   margin-bottom: 2.5rem;
-  color: #b0b7d6;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
@@ -80,42 +79,43 @@ html, body {
 }
 
 .feature {
-  background: rgba(41, 42, 65, 0.6);
-  padding: 1.5rem;
-  border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: var(--bg-tertiary);
+  opacity: 0.6;
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+  transition: transform var(--transition-medium), box-shadow var(--transition-medium);
 }
 
 .feature:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  border-color: rgba(111, 152, 240, 0.3);
+  border-color: var(--border-accent);
 }
 
 .feature h3 {
   font-size: 1.3rem;
   margin-bottom: 0.75rem;
-  color: #8fd3f4;
+  color: var(--text-accent);
 }
 
 .feature p {
-  color: #b0b7d6;
+  color: var(--text-secondary);
   line-height: 1.5;
   font-size: 0.95rem;
 }
 
 /* Footer */
 .footer {
-  margin-top: 3rem;
-  padding: 1rem;
+  margin-top: var(--spacing-2xl);
+  padding: var(--spacing-md);
   background-color: rgba(29, 30, 43, 0.5);
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
 }
 
 .footer p {
-  color: #8fd3f4;
+  color: var(--text-accent);
   font-size: 1.1rem;
   margin: 0;
 }
