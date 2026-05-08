@@ -120,6 +120,64 @@ html, body {
   margin: 0;
 }
 
+/* Tag filter styles */
+.tag-filter {
+  margin-bottom: var(--spacing-xl);
+  width: 100%;
+  max-width: 800px;
+}
+
+.tag-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  justify-content: center;
+  padding: var(--spacing-md);
+  background-color: rgba(29, 30, 43, 0.7);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-light);
+  backdrop-filter: blur(10px);
+}
+
+.tag-button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.tag-button.selected {
+  background-color: var(--color-2);
+  color: var(--text-primary);
+  border-color: var(--border-accent);
+  box-shadow: 0 4px 12px rgba(84, 114, 204, 0.3);
+}
+
+.tag-button.unselected {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border-color: var(--border-light);
+}
+
+.tag-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.tag-button.selected:hover {
+  background-color: var(--color-1);
+}
+
+.tag-button.unselected:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .title {
