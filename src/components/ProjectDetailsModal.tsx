@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { type Project } from '../types/project';
 import Text from './Text';
 
@@ -8,6 +8,22 @@ interface ProjectDetailsModalProps {
 }
 
 const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ project, onClose }) => {
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (selectedImageIndex !== null) {
+          setSelectedImageIndex(null);
+        } else {
+          onClose();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [selectedImageIndex, onClose]);
+
   if (!project) return null;
 
   return (
@@ -60,7 +76,19 @@ const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ project, onCl
             </Text>
             <div className="modal-image-grid">
               {project.images.map((image, index) => (
-                <div key={index} className="modal-image-item">
+                <div
+                  key={index}
+                  className="modal-image-item"
+                  onClick={() => setSelectedImageIndex(index)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedImageIndex(index);
+                    }
+                  }}
+                >
                   <img
                     src={image}
                     alt={`${project.title} screenshot ${index + 1}`}
@@ -131,6 +159,57 @@ const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ project, onCl
           </button>
         </div>
       </div>
+
+      {/* Lightbox for image zoom */}
+      {selectedImageIndex !== null && project.images && (
+        <div className="lightbox-overlay" onClick={() => setSelectedImageIndex(null)}>
+          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="lightbox-close-btn"
+              onClick={() => setSelectedImageIndex(null)}
+              aria-label="Close lightbox"
+            >
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            <div className="lightbox-image-container">
+              <img
+                src={project.images[selectedImageIndex]}
+                alt={`${project.title} full size ${selectedImageIndex + 1}`}
+                className="lightbox-image"
+              />
+            </div>
+            <div className="lightbox-navigation">
+              {selectedImageIndex > 0 && (
+                <button
+                  className="lightbox-nav-btn prev"
+                  onClick={() => setSelectedImageIndex(selectedImageIndex - 1)}
+                  aria-label="Previous image"
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              )}
+              <span className="lightbox-counter">
+                {selectedImageIndex + 1} / {project.images.length}
+              </span>
+              {selectedImageIndex < project.images.length - 1 && (
+                <button
+                  className="lightbox-nav-btn next"
+                  onClick={() => setSelectedImageIndex(selectedImageIndex + 1)}
+                  aria-label="Next image"
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
