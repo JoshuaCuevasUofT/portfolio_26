@@ -6,7 +6,7 @@ declare global {
     VANTA: {
       WAVES: (config: {
         el: string | HTMLElement;
-        THREE: any;
+        THREE: typeof THREE;
         mouseControls?: boolean;
         touchControls?: boolean;
         gyroControls?: boolean;
@@ -22,8 +22,8 @@ declare global {
       }) => {
         destroy: () => void;
       };
-      current?: any;
-      register: (name: string, effect: any) => void;
+      current?: unknown;
+      register: (name: string, effect: unknown) => void;
     };
   }
 }

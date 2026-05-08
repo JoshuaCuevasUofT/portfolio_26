@@ -16,7 +16,7 @@ import 'vanta/dist/vanta.waves.min'
 
 function App() {
   const vantaRef = useRef<HTMLDivElement>(null)
-  const vantaEffect = useRef<any>(null)
+  const vantaEffect = useRef<ReturnType<typeof window.VANTA.WAVES> | null>(null)
   const allTags: Tag[] = ['Data Science (ML)', 'Data Analysis', 'Quantitative Research', 'Data Engineering', 'Dashboards']
   const [selectedTags, setSelectedTags] = useState<Tag[]>(allTags)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
@@ -94,6 +94,7 @@ function App() {
     };
 
     // Lazy load background animation: wait for idle time after initial render
+    // Uses requestIdleCallback to avoid blocking main thread during initial paint
     if ('requestIdleCallback' in window) {
       requestIdleCallback(initVanta, { timeout: 2000 });
     } else {
