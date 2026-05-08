@@ -86,10 +86,12 @@ html, body {
   transition: transform var(--transition-medium), box-shadow var(--transition-medium);
 }
 
-.feature:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  border-color: var(--border-accent);
+@media (hover: hover) {
+  .feature:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    border-color: var(--border-accent);
+  }
 }
 
 .feature h3 {
@@ -163,18 +165,20 @@ html, body {
   border-color: var(--border-light);
 }
 
-.tag-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
+@media (hover: hover) {
+  .tag-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
 
-.tag-button.selected:hover {
-  background-color: var(--color-1);
-}
+  .tag-button.selected:hover {
+    background-color: var(--color-1);
+  }
 
-.tag-button.unselected:hover {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
+  .tag-button.unselected:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+  }
 }
 
 /* Project Grid styles */
@@ -333,9 +337,11 @@ html, body {
   transition: all var(--transition-fast);
 }
 
-.modal-close-btn:hover {
-  color: var(--text-accent);
-  background-color: var(--hover-bg);
+@media (hover: hover) {
+  .modal-close-btn:hover {
+    color: var(--text-accent);
+    background-color: var(--hover-bg);
+  }
 }
 
 .modal-close-btn.secondary {
@@ -345,9 +351,11 @@ html, body {
   border: 1px solid var(--border-light);
 }
 
-.modal-close-btn.secondary:hover {
-  background-color: var(--color-1);
-  border-color: var(--border-accent);
+@media (hover: hover) {
+  .modal-close-btn.secondary:hover {
+    background-color: var(--color-1);
+    border-color: var(--border-accent);
+  }
 }
 
 .modal-image-grid {
@@ -361,6 +369,26 @@ html, body {
   overflow: hidden;
   border: 1px solid var(--border-light);
   background-color: var(--bg-tertiary);
+  transition: transform var(--transition-fast);
+  cursor: zoom-in;
+}
+
+@media (hover: hover) {
+  .modal-image-item:hover {
+    transform: scale(1.05);
+    border-color: var(--border-accent);
+  }
+
+  .modal-image-item:hover img {
+    transform: scale(1.5);
+  }
+}
+
+.modal-image-item img {
+  transition: transform var(--transition-medium);
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
 }
 
 .modal-links {
@@ -381,10 +409,12 @@ html, body {
   font-weight: 500;
 }
 
-.modal-link:hover {
-  background-color: var(--color-1);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(84, 114, 204, 0.3);
+@media (hover: hover) {
+  .modal-link:hover {
+    background-color: var(--color-1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(84, 114, 204, 0.3);
+  }
 }
 
 /* Responsive modal */
