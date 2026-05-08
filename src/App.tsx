@@ -39,53 +39,65 @@ function App() {
   const filteredProjects = filterProjects(projects, selectedTags)
 
   useEffect(() => {
-    if (!vantaEffect.current && vantaRef.current) {
-      console.log('Initializing Vanta.js WAVES effect...')
+    if (!vantaRef.current) return;
 
-      // Check WebGL support
-      const canvas = document.createElement('canvas')
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
-      if (!gl) {
-        console.error('WebGL not supported')
-        return
-      }
-      console.log('WebGL is supported')
+    const initVanta = () => {
+      if (!vantaEffect.current && vantaRef.current) {
+        console.log('Initializing Vanta.js WAVES effect...')
 
-      try {
-        // Check if Vanta.js is available on window
-        if (!window.VANTA || !window.VANTA.WAVES) {
-          console.error('Vanta.js WAVES not available on window.VANTA')
+        // Check WebGL support
+        const canvas = document.createElement('canvas')
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+        if (!gl) {
+          console.error('WebGL not supported')
           return
         }
+        console.log('WebGL is supported')
 
-        vantaEffect.current = window.VANTA.WAVES({
-          el: vantaRef.current,
-          THREE: THREE,
-          mouseControls: true,
-          touchControls: true,
-          gyroControls: false,
-          minHeight: 200.00,
-          minWidth: 200.00,
-          scale: 1.00,
-          scaleMobile: 1.00,
-          color: 0x1d1e2b,  // Dark blue-gray for subtle background waves
-          shininess: 30.00,  // Default shininess
-          waveHeight: 15.00,  // Default wave height
-          waveSpeed: 1.00,    // Default speed
-          zoom: 0.65
-        })
+        try {
+          // Check if Vanta.js is available on window
+          if (!window.VANTA || !window.VANTA.WAVES) {
+            console.error('Vanta.js WAVES not available on window.VANTA')
+            return
+          }
 
-        console.log('Vanta.js effect created:', vantaEffect.current)
+          vantaEffect.current = window.VANTA.WAVES({
+            el: vantaRef.current,
+            THREE: THREE,
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x1d1e2b,  // Dark blue-gray for subtle background waves
+            shininess: 30.00,  // Default shininess
+            waveHeight: 15.00,  // Default wave height
+            waveSpeed: 1.00,    // Default speed
+            zoom: 0.65
+          })
 
-        // Check if effect is actually working
-        if (vantaEffect.current) {
-          console.log('Vanta.js effect initialized successfully')
-        } else {
-          console.error('Vanta.js effect failed to initialize')
+          console.log('Vanta.js effect created:', vantaEffect.current)
+
+          // Check if effect is actually working
+          if (vantaEffect.current) {
+            console.log('Vanta.js effect initialized successfully')
+          } else {
+            console.error('Vanta.js effect failed to initialize')
+          }
+        } catch (error) {
+          console.error('Error creating Vanta.js effect:', error)
         }
-      } catch (error) {
-        console.error('Error creating Vanta.js effect:', error)
       }
+    };
+
+    // Lazy load background animation: wait for idle time after initial render
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(initVanta, { timeout: 2000 });
+    } else {
+      // Fallback: delay after page load
+      setTimeout(initVanta, 500);
     }
 
     return () => {

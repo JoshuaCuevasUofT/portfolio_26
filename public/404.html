@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio - Redirect</title>
+    <script>
+        // Redirect to index.html for SPA routing
+        sessionStorage.redirect = location.pathname;
+        location.href = '/' + location.pathname.split('/').filter(Boolean).join('/');
+    </script>
+</head>
+<body>
+    <noscript>
+        <p>JavaScript is required for this application. Please enable JavaScript to continue.</p>
+    </noscript>
+</body>
+</html>
