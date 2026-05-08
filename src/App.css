@@ -143,7 +143,7 @@ html, body {
 
 .tag-button {
   padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-full);
+  border-radius: 6px;
   border: 1px solid transparent;
   font-family: inherit;
   font-size: 0.9rem;
@@ -187,15 +187,75 @@ html, body {
   }
 }
 
+.refresh-button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: 6px;
+  border: 1px solid var(--border-light);
+  font-family: inherit;
+  font-size: 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.refresh-button:disabled,
+.refresh-button.disabled {
+  background-color: var(--bg-secondary);
+  color: var(--text-disabled);
+  cursor: not-allowed;
+  border-color: var(--border-light);
+  opacity: 0.6;
+}
+
+.refresh-button:active:not(:disabled) {
+  transform: translateY(1px);
+  transition-duration: 50ms;
+}
+
+@media (hover: hover) {
+  .refresh-button:hover:not(:disabled):not(.disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--border-accent);
+  }
+}
+
 /* Project Grid styles */
 .project-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: var(--spacing-xl);
   width: 100%;
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: var(--spacing-md);
+}
+
+@media (min-width: 1200px) {
+  .project-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1199px) and (min-width: 768px) {
+  .project-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .project-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .project-grid-item {
@@ -258,7 +318,7 @@ html, body {
 /* Layout styles */
 .layout {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: var(--spacing-xl);
 }

@@ -5,6 +5,7 @@ import Text from './components/Text'
 import ProjectGrid from './components/ProjectGrid'
 import TagFilter from './components/TagFilter'
 import Layout from './components/Layout'
+import Skills from './components/Skills'
 import { lazy, Suspense } from 'react'
 const ProjectDetailsModal = lazy(() => import('./components/ProjectDetailsModal'))
 import { projects } from './data/projects'
@@ -27,6 +28,10 @@ function App() {
 
   const handleTagDeselect = (tag: Tag) => {
     setSelectedTags(prev => prev.filter(t => t !== tag))
+  }
+
+  const handleRefresh = () => {
+    setSelectedTags(allTags)
   }
 
   const handleProjectClick = (project: Project) => {
@@ -132,6 +137,7 @@ function App() {
                 selectedTags={selectedTags}
                 onTagSelect={handleTagSelect}
                 onTagDeselect={handleTagDeselect}
+                onRefresh={handleRefresh}
               />
               <Text variant="small" color="secondary" align="center" style={{ marginTop: 'var(--spacing-sm)' }}>
                 {selectedTags.length === 0 ? 'No tags selected (showing no projects)' :
@@ -146,6 +152,11 @@ function App() {
             />
           </section>
         </Layout>
+
+        {/* Skills Section */}
+        <section className="section">
+          <Skills />
+        </section>
         </main>
         <Suspense fallback={null}>
           <ProjectDetailsModal
