@@ -3,6 +3,8 @@ import * as THREE from 'three'
 import './App.css'
 import Button from './components/Button'
 import Text from './components/Text'
+import ProjectCard from './components/ProjectCard'
+import { projects } from './data/projects'
 
 // Import Vanta.js - it will register itself on window.VANTA
 import 'vanta/dist/vanta.waves.min'
@@ -150,6 +152,27 @@ function App() {
                   </Button>
                 </div>
               </div>
+            </div>
+          </section>
+
+          {/* ProjectCard demonstration */}
+          <section style={{
+            maxWidth: '800px',
+            margin: 'var(--spacing-2xl) auto',
+            padding: '0 var(--spacing-md)'
+          }}>
+            <Text variant="h2" color="accent" align="center" style={{ marginBottom: 'var(--spacing-lg)' }}>
+              Project Card Demo (Issue #004)
+            </Text>
+            <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+              {projects.map((project) => (
+                <div key={project.id} style={{ marginBottom: 'var(--spacing-lg)' }}>
+                  <ProjectCard
+                    project={project}
+                    onClick={() => console.log(`Clicked project: ${project.title}`)}
+                  />
+                </div>
+              ))}
             </div>
           </section>
         </main>

@@ -1,3 +1,4 @@
+// types/project.ts
 export type Tag =
   | 'Data Science (ML)'
   | 'Data Analysis'
@@ -16,8 +17,8 @@ export interface Project {
   shortDescription: string;
   detailedDescription: string;
   tags: Tag[];
-  images: string[]; // paths to images in /public/images/
+  images: string[];
   codeSnippets?: string[];
   links?: ProjectLink[];
-  date: string; // ISO format for chronological ordering
+  date: string;
 }
