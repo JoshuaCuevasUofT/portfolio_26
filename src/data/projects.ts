@@ -7,7 +7,9 @@ const eventDrivenBacktest: Project = {
   shortDescription: 'Event-driven backtesting framework for quantitative research and trading strategy evaluation.',
   detailedDescription: `**Background**\n\nThis project implements an event-driven backtesting framework for evaluating quantitative trading strategies. Unlike vectorized backtesting, event-driven systems process market data as a stream of events (ticks, bars, signals) allowing more realistic modeling of execution, latency, and market impact.\n\n**Motivations**\n\nTraditional backtesting often suffers from look‑ahead bias and simplified assumptions about order fills. An event‑driven architecture addresses these limitations by:\n- Processing data in chronological order, exactly as a live system would\n- Simulating order matching with configurable latency and slippage models\n- Allowing strategy logic to react to intra‑bar price movements\n- Supporting both historical and real‑time data feeds with the same engine\n\n**Architecture**\n\nThe core components are:\n\n1. **Event Loop** – Dispatches market data, signals, and fill events to registered handlers.\n2. **Data Handler** – Abstracts the data source (CSV, database, live feed) and emits bar/tick events.\n3. **Portfolio** – Tracks positions, cash, and calculates performance metrics (Sharpe, drawdown, etc.).\n4. **Execution Handler** – Models order‑to‑fill latency, partial fills, and transaction costs.\n5. **Strategy** – User‑defined class that receives market events and submits orders.\n\n**Example Strategy: Moving‑Average Crossover**\n\n`,
   tags: ['Quantitative Research', 'Data Engineering'],
-  images: [],
+  images: [
+    '/images/projects/event_driven_backtest/Event Driven Backtesting Flow Chart.png'
+  ],
   codeSnippets: [
     `class MovingAverageCrossover(Strategy):
     def __init__(self, short_window=10, long_window=30):

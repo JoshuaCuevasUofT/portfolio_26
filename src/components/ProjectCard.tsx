@@ -13,6 +13,15 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
       onClick={onClick}
       style={{ cursor: onClick ? 'pointer' : 'default' }}
     >
+      {project.images.length > 0 && (
+        <div style={{ marginBottom: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', overflow: 'hidden', height: '200px', backgroundColor: 'var(--hover-bg)' }}>
+          <img
+            src={project.images[0]}
+            alt={`${project.title} highlight`}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--spacing-md)' }}>
         <h3 className="heading-3" style={{ margin: 0, color: 'var(--text-accent)' }}>
           {project.title}
