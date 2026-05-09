@@ -420,6 +420,7 @@ This module enables more rigorous model validation in machine learning pipelines
   tags: ['Data Science (ML)', 'Quantitative Research', 'Data Analysis'],
   images: [
     getImagePath("public\\images\\projects\\permutation_test_dev\\Pasted image 20260509133917.png"),
+    getImagePath("public\\images\\projects\\permutation_test_dev\\Pasted image 20260509133027.png"),
     getImagePath("public\\images\\projects\\permutation_test_dev\\Pasted image 20260509133114.png"),
     getImagePath("public\\images\\projects\\permutation_test_dev\\Pasted image 20260509133240.png"),
     getImagePath("public\\images\\projects\\permutation_test_dev\\Pasted image 20260509133408.png"),
