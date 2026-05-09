@@ -1,5 +1,11 @@
 import { type Project, type Tag } from '../types/project';
 
+function getImagePath(path: string): string {
+  // Remove leading slash if present to avoid double slash
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${import.meta.env.BASE_URL}${cleanPath}`;
+}
+
 // Static project data (extracted previously from markdown)
 const eventDrivenBacktest: Project = {
   id: 'event-driven-backtesting-framework',
@@ -8,7 +14,7 @@ const eventDrivenBacktest: Project = {
   detailedDescription: `**Background**\n\nThis project implements an event-driven backtesting framework for evaluating quantitative trading strategies. Unlike vectorized backtesting, event-driven systems process market data as a stream of events (ticks, bars, signals) allowing more realistic modeling of execution, latency, and market impact.\n\n**Motivations**\n\nTraditional backtesting often suffers from look‑ahead bias and simplified assumptions about order fills. An event‑driven architecture addresses these limitations by:\n- Processing data in chronological order, exactly as a live system would\n- Simulating order matching with configurable latency and slippage models\n- Allowing strategy logic to react to intra‑bar price movements\n- Supporting both historical and real‑time data feeds with the same engine\n\n**Architecture**\n\nThe core components are:\n\n1. **Event Loop** – Dispatches market data, signals, and fill events to registered handlers.\n2. **Data Handler** – Abstracts the data source (CSV, database, live feed) and emits bar/tick events.\n3. **Portfolio** – Tracks positions, cash, and calculates performance metrics (Sharpe, drawdown, etc.).\n4. **Execution Handler** – Models order‑to‑fill latency, partial fills, and transaction costs.\n5. **Strategy** – User‑defined class that receives market events and submits orders.\n\n**Example Strategy: Moving‑Average Crossover**\n\n`,
   tags: ['Quantitative Research', 'Data Engineering'],
   images: [
-    '/images/projects/event_driven_backtest/Event Driven Backtesting Flow Chart.png'
+    getImagePath('/images/projects/event_driven_backtest/Event Driven Backtesting Flow Chart.png')
   ],
   codeSnippets: [
     `class MovingAverageCrossover(Strategy):
@@ -89,15 +95,15 @@ This exploratory data analysis project examines New York City taxi data from the
 - Visualization of ride frequency distribution across locations`,
   tags: ['Data Analysis', 'Data Science (ML)'],
   images: [
-    '/images/projects/urban_pulse_tip_analysis/5.png',
-    '/images/projects/urban_pulse_tip_analysis/6.png',
-    '/images/projects/urban_pulse_tip_analysis/7.png',
-    '/images/projects/urban_pulse_tip_analysis/8.png',
-    '/images/projects/urban_pulse_tip_analysis/cumul.png',
-    '/images/projects/urban_pulse_tip_analysis/output.png',
-    '/images/projects/urban_pulse_tip_analysis/output2.png',
-    '/images/projects/urban_pulse_tip_analysis/output3.png',
-    '/images/projects/urban_pulse_tip_analysis/output4.png'
+    getImagePath('/images/projects/urban_pulse_tip_analysis/5.png'),
+    getImagePath('/images/projects/urban_pulse_tip_analysis/6.png'),
+    getImagePath('/images/projects/urban_pulse_tip_analysis/7.png'),
+    getImagePath('/images/projects/urban_pulse_tip_analysis/8.png'),
+    getImagePath('/images/projects/urban_pulse_tip_analysis/cumul.png'),
+    getImagePath('/images/projects/urban_pulse_tip_analysis/output.png'),
+    getImagePath('/images/projects/urban_pulse_tip_analysis/output2.png'),
+    getImagePath('/images/projects/urban_pulse_tip_analysis/output3.png'),
+    getImagePath('/images/projects/urban_pulse_tip_analysis/output4.png')
   ],
   codeSnippets: [
     `# Create box plot of trip_distance
@@ -177,18 +183,18 @@ This project builds a predictive model for NYC taxi fare amounts through rigorou
 - Comprehensive visualization of residuals and prediction accuracy`,
   tags: ['Data Analysis', 'Data Science (ML)'],
   images: [
-    '/images/projects/urban_pulse_features_regression/1.PNG',
-    '/images/projects/urban_pulse_features_regression/2.png',
-    '/images/projects/urban_pulse_features_regression/3.PNG',
-    '/images/projects/urban_pulse_features_regression/4.png',
-    '/images/projects/urban_pulse_features_regression/5.png',
-    '/images/projects/urban_pulse_features_regression/6.png',
-    '/images/projects/urban_pulse_features_regression/7.PNG',
-    '/images/projects/urban_pulse_features_regression/8.png',
-    '/images/projects/urban_pulse_features_regression/9.png',
-    '/images/projects/urban_pulse_features_regression/10.png',
-    '/images/projects/urban_pulse_features_regression/11.PNG',
-    '/images/projects/urban_pulse_features_regression/cumul.png'
+    getImagePath('/images/projects/urban_pulse_features_regression/1.PNG'),
+    getImagePath('/images/projects/urban_pulse_features_regression/2.png'),
+    getImagePath('/images/projects/urban_pulse_features_regression/3.PNG'),
+    getImagePath('/images/projects/urban_pulse_features_regression/4.png'),
+    getImagePath('/images/projects/urban_pulse_features_regression/5.png'),
+    getImagePath('/images/projects/urban_pulse_features_regression/6.png'),
+    getImagePath('/images/projects/urban_pulse_features_regression/7.PNG'),
+    getImagePath('/images/projects/urban_pulse_features_regression/8.png'),
+    getImagePath('/images/projects/urban_pulse_features_regression/9.png'),
+    getImagePath('/images/projects/urban_pulse_features_regression/10.png'),
+    getImagePath('/images/projects/urban_pulse_features_regression/11.PNG'),
+    getImagePath('/images/projects/urban_pulse_features_regression/cumul.png')
   ],
   codeSnippets: [
     `# A/B test for fare amount by payment type
@@ -268,7 +274,7 @@ This capstone project for STA302 Methods of Data Analysis investigates the relat
 The project provided actionable insights for both professors and students. Professors can use the findings to guide evidence‑based teaching recommendations, while students can prioritize their time more effectively to improve academic performance. The research also highlighted the significant impact of external stressors (like COVID‑19) on academic success, suggesting a need for better institutional support systems.`,
   tags: ['Data Analysis', 'Data Science (ML)'],
   images: [
-    '/images/projects/sta302_final_project/school project.png'
+    getImagePath('/images/projects/sta302_final_project/school project.png')
   ],
   codeSnippets: [
     `# Example regression analysis code
@@ -339,9 +345,9 @@ This collection showcases interactive Tableau dashboards designed for effective 
 These visualizations demonstrate the power of Tableau for transforming raw data into compelling narratives. Each dashboard serves as both an analytical tool and a communication medium, making complex data accessible to stakeholders with varying technical backgrounds. The interactive elements encourage exploration and discovery, leading to deeper insights than static reports could provide.`,
   tags: ['Dashboards'],
   images: [
-    '/images/projects/tableau_visualizations/bikes.png',
-    '/images/projects/tableau_visualizations/lightning.png',
-    '/images/projects/tableau_visualizations/lightning visuals2.png'
+    getImagePath('/images/projects/tableau_visualizations/bikes.png'),
+    getImagePath('/images/projects/tableau_visualizations/lightning.png'),
+    getImagePath('/images/projects/tableau_visualizations/lightning visuals2.png')
   ],
   links: [
     { title: 'Seoul Bike Dashboard', url: 'https://public.tableau.com/views/SeoulBikeEfficientBikeMaintananceTiming/Sheet12?:language=en-US&:display_count=n&:origin=viz_share_link' },

@@ -9,7 +9,7 @@ const Hero: React.FC = () => {
         <div className="hero-profile">
           <div className="hero-image-container">
             <img
-              src="/images/profile/dolphin hat crop.png"
+              src={`${import.meta.env.BASE_URL}/images/profile/dolphin hat crop.png`}
               alt="Joshua Joel Cuevas"
               className="hero-image"
             />

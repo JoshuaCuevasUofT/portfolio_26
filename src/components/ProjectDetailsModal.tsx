@@ -3,6 +3,8 @@ import { type Project } from '../types/project';
 import Text from './Text';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface ProjectDetailsModalProps {
   project: Project | null;
@@ -78,9 +80,11 @@ const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({ project, onCl
           ))}
         </div>
 
-        <Text variant="body" color="secondary" style={{ marginBottom: 'var(--spacing-lg)' }}>
-          {project.detailedDescription}
-        </Text>
+        <div className="markdown-content">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {project.detailedDescription}
+          </ReactMarkdown>
+        </div>
 
         {project.images && project.images.length > 0 && (
           <div style={{ marginBottom: 'var(--spacing-lg)' }}>
