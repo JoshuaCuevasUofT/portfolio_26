@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+// vite.config.ts
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
 
-// https://vite.dev/config/
 export default defineConfig({
   base: '/',
   plugins: [react()],
@@ -14,15 +14,13 @@ export default defineConfig({
       treeshake: true,
       output: {
         manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
-              return 'vendor';
-            }
-            if (id.includes('three') || id.includes('vanta')) {
-              return 'three';
-            }
-            return 'vendor'; // other node_modules
-          }
+          if (!id.includes('node_modules')) return;
+          if (id.includes('react-dom'))        return 'react-dom';
+          if (id.includes('react'))            return 'react';
+          if (id.includes('three') || id.includes('vanta')) return 'three';
+          if (id.includes('react-syntax-highlighter')) return 'syntax-highlighter';
+          if (id.includes('react-markdown') || id.includes('remark')) return 'markdown';
+          return 'vendor';
         },
       },
     },

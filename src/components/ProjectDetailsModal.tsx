@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { type Project } from '../types/project';
-import Text from './Text';
+import React, { useEffect, useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { type Project } from '../types/project';
+import Text from './Text';
 
 interface ProjectDetailsModalProps {
   project: Project | null;

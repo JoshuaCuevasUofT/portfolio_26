@@ -1,24 +1,26 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
-import './App.css'
-import Text from './components/Text'
-import ProjectGrid from './components/ProjectGrid'
-import TagFilter from './components/TagFilter'
-import Layout from './components/Layout'
-import Skills from './components/Skills'
-import { lazy, Suspense } from 'react'
-const ProjectDetailsModal = lazy(() => import('./components/ProjectDetailsModal'))
-import { projects } from './data/projects'
-import { filterProjects } from './utils/filterProjects'
-import { type Tag, type Project } from './types/project'
-
-// Import Vanta.js - it will register itself on window.VANTA
 import 'vanta/dist/vanta.waves.min'
+import './App.css'
+import Layout from './components/Layout'
+import ProjectGrid from './components/ProjectGrid'
+import Skills from './components/Skills'
+import TagFilter from './components/TagFilter'
+import Text from './components/Text'
+import { projects } from './data/projects'
+import { type Project, type Tag } from './types/project'
+import { filterProjects } from './utils/filterProjects'
+const ProjectDetailsModal = lazy(() => import('./components/ProjectDetailsModal'))
 
 function App() {
   const vantaRef = useRef<HTMLDivElement>(null)
   const vantaEffect = useRef<ReturnType<typeof window.VANTA.WAVES> | null>(null)
-  const allTags: Tag[] = ['Data Science (ML)', 'Data Analysis', 'Quantitative Research', 'Data Engineering', 'Dashboards']
+
+  const allTags: Tag[] = useMemo(
+    () => ['Data Science (ML)', 'Data Analysis', 'Quantitative Research', 'Data Engineering', 'Dashboards'],
+    []
+  )
+
   const [selectedTags, setSelectedTags] = useState<Tag[]>(allTags)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
@@ -42,73 +44,55 @@ function App() {
     setSelectedProject(null)
   }
 
-  const filteredProjects = filterProjects(projects, selectedTags)
+  const filteredProjects = useMemo(
+    () => filterProjects(projects, selectedTags),
+    [selectedTags]
+  )
 
   useEffect(() => {
     if (!vantaRef.current) return;
 
     const initVanta = () => {
-      if (!vantaEffect.current && vantaRef.current) {
-        console.log('Initializing Vanta.js WAVES effect...')
+      if (vantaEffect.current || !vantaRef.current) return;
 
-        // Check WebGL support
-        const canvas = document.createElement('canvas')
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
-        if (!gl) {
-          console.error('WebGL not supported')
-          return
-        }
-        console.log('WebGL is supported')
+      const canvas = document.createElement('canvas')
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+      if (!gl) {
+        console.error('WebGL not supported')
+        return
+      }
 
-        try {
-          // Check if Vanta.js is available on window
-          if (!window.VANTA || !window.VANTA.WAVES) {
-            console.error('Vanta.js WAVES not available on window.VANTA')
-            return
-          }
+      if (!window.VANTA?.WAVES) return;
 
-          vantaEffect.current = window.VANTA.WAVES({
-            el: vantaRef.current,
-            THREE: THREE,
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            minHeight: 200.00,
-            minWidth: 200.00,
-            scale: 1.00,
-            scaleMobile: 1.00,
-            color: 0x1d1e2b,  // Dark blue-gray for subtle background waves
-            shininess: 30.00,  // Default shininess
-            waveHeight: 15.00,  // Default wave height
-            waveSpeed: 1.00,    // Default speed
-            zoom: 0.65
-          })
-
-          console.log('Vanta.js effect created:', vantaEffect.current)
-
-          // Check if effect is actually working
-          if (vantaEffect.current) {
-            console.log('Vanta.js effect initialized successfully')
-          } else {
-            console.error('Vanta.js effect failed to initialize')
-          }
-        } catch (error) {
-          console.error('Error creating Vanta.js effect:', error)
-        }
+      try {
+        vantaEffect.current = window.VANTA.WAVES({
+          el: vantaRef.current,
+          THREE: THREE,
+          mouseControls: true,
+          touchControls: true,
+          gyroControls: false,
+          minHeight: 200.00,
+          minWidth: 200.00,
+          scale: 1.00,
+          scaleMobile: 1.00,
+          color: 0x1d1e2b,
+          shininess: 30.00,
+          waveHeight: 15.00,
+          waveSpeed: 1.00,
+          zoom: 0.65,
+        })
+      } catch (error) {
+        console.error('Error creating Vanta.js effect:', error)
       }
     };
 
-    // Lazy load background animation: wait for idle time after initial render
-    // Uses requestIdleCallback to avoid blocking main thread during initial paint
     if ('requestIdleCallback' in window) {
       requestIdleCallback(initVanta, { timeout: 2000 });
     } else {
-      // Fallback: delay after page load
       setTimeout(initVanta, 500);
     }
 
     return () => {
-      console.log('Cleaning up Vanta.js effect...')
       if (vantaEffect.current) {
         vantaEffect.current.destroy()
         vantaEffect.current = null
@@ -123,47 +107,49 @@ function App() {
         <main>
           <Layout>
 
-          {/* Portfolio Projects Section */}
-          <section className="section">
-            <Text variant="h2" color="accent" align="center" style={{ marginBottom: 'var(--spacing-lg)' }}>
-              Portfolio Projects
-            </Text>
-            <Text variant="body" color="secondary" align="center" style={{ marginBottom: 'var(--spacing-xl)' }}>
-              Filter projects by skill tags to find relevant work samples.
-            </Text>
-
-            <div style={{ maxWidth: '800px', margin: '0 auto var(--spacing-xl)' }}>
-              <TagFilter
-                selectedTags={selectedTags}
-                onTagSelect={handleTagSelect}
-                onTagDeselect={handleTagDeselect}
-                onRefresh={handleRefresh}
-              />
-              <Text variant="small" color="secondary" align="center" style={{ marginTop: 'var(--spacing-sm)' }}>
-                {selectedTags.length === 0 ? 'No tags selected (showing no projects)' :
-                 selectedTags.length === allTags.length ? 'All tags selected (showing all projects)' :
-                 `Showing ${filteredProjects.length} project${filteredProjects.length !== 1 ? 's' : ''} with tags: ${selectedTags.join(', ')}`}
+            {/* Portfolio Projects Section */}
+            <section className="section">
+              <Text variant="h2" color="accent" align="center" style={{ marginBottom: 'var(--spacing-lg)' }}>
+                Portfolio Projects
               </Text>
-            </div>
+              <Text variant="body" color="secondary" align="center" style={{ marginBottom: 'var(--spacing-xl)' }}>
+                Filter projects by skill tags to find relevant work samples.
+              </Text>
 
-            <ProjectGrid
-              projects={filteredProjects}
-              onProjectClick={handleProjectClick}
-            />
+              <div style={{ maxWidth: '800px', margin: '0 auto var(--spacing-xl)' }}>
+                <TagFilter
+                  selectedTags={selectedTags}
+                  onTagSelect={handleTagSelect}
+                  onTagDeselect={handleTagDeselect}
+                  onRefresh={handleRefresh}
+                />
+                <Text variant="small" color="secondary" align="center" style={{ marginTop: 'var(--spacing-sm)' }}>
+                  {selectedTags.length === 0 ? 'No tags selected (showing no projects)' :
+                   selectedTags.length === allTags.length ? 'All tags selected (showing all projects)' :
+                   `Showing ${filteredProjects.length} project${filteredProjects.length !== 1 ? 's' : ''} with tags: ${selectedTags.join(', ')}`}
+                </Text>
+              </div>
+
+              <ProjectGrid
+                projects={filteredProjects}
+                onProjectClick={handleProjectClick}
+              />
+            </section>
+          </Layout>
+
+          {/* Skills Section */}
+          <section className="section">
+            <Skills />
           </section>
-        </Layout>
-
-        {/* Skills Section */}
-        <section className="section">
-          <Skills />
-        </section>
         </main>
+
         <Suspense fallback={null}>
           <ProjectDetailsModal
             project={selectedProject}
             onClose={handleCloseModal}
           />
         </Suspense>
+
         <footer className="footer">
           <Text variant="small" color="accent" align="center">
             Move your mouse around to interact with the animated waves!
