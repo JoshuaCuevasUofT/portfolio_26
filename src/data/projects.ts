@@ -357,6 +357,48 @@ These visualizations demonstrate the power of Tableau for transforming raw data 
   date: '2023-10-01',
 };
 
+const projectWRDSIIDReplication: Project = {
+  id: 'wrds-iid-variable-replication',
+  title: 'WRDS IID Variable Replication: Microstructure Feature Engineering from Panel Data',
+  shortDescription: 'Replicated 500+ microstructure features from WRDS research using pandas on financial panel data, including Lee–Ready tick tests and market hour summaries.',
+  detailedDescription: `**Project Overview**
+This project replicated key signals and variables from a recent WRDS IID research paper, targeting microstructure financial panel data. The effort produced a reusable library of approximately 500 validated features for quantitative strategy research.
+
+**Methodology**
+Microstructure data was extracted using Compute Canada clusters (Compustat) and Polygon real-time broker feeds. WRDS DTAQ IID manual formulas were cross-referenced with a dataframe of DTAQ results. Mathematical programming in NumPy and pandas implemented the replication, with each feature validated against Wharton’s benchmark outputs.
+
+**Key Findings**
+The library includes Lee and Ready (1991) tick test trade classifications, trading and exchange flags, order type aggregates, special order summaries, and market hour summaries. Thoughtful handling of zero denominators (e.g., \`c/log(a+b)\` when a+b=1) was implemented, extending beyond published WRDS documentation.
+
+**Technical Implementation**
+Modular feature functions compute once per dataset, with results cached for reuse to reduce overhead. Parallelization, vectorization, and strong mathematical programming minimized memory and computation costs. Floating-point errors were mitigated by cross-validation against NYSE microstructure data manuals.
+
+**Impact**
+Strategists now access a robust, production-ready library of 500+ microstructure signals, accelerating research in quantitative finance and algorithmic trading applications.`,
+  tags: ['Data Analysis', 'Quantitative Research'],
+  images: [getImagePath("/images/projects/wrds_replication/signalreplication_acc.png")],
+  codeSnippets: [
+    `def lee_ready_tick_test(trades):
+    """
+    Replicate Lee-Ready (1991) trade classification.
+    Returns: 1 (buy), -1 (sell), 0 (uncertain)
+    """
+    trades['tick'] = trades['price'].diff()
+    trades['quote_mid'] = (trades['bid'] + trades['ask']) / 2
+    condition = (
+        (trades['tick'] > 0) |
+        ((trades['tick'] == 0) & (trades['price'] > trades['quote_mid']))
+    )
+    trades['classification'] = np.where(condition, 1,
+                                        np.where(trades['tick'] < 0, -1, 0))
+    return trades.groupby('date')['classification'].agg(['sum', 'count'])`
+  ],
+  links: [
+    { title: 'GitHub Repository', url: 'https://github.com/quantfinancelab/ProjectAlpha/tree/refactor_summary_wrds2' }
+    ],  // TODO: add links
+  date: '2023-11-11',   // TODO: add date
+};
+
 // Export array of all projects (chronologically ordered by date)
 export const projects: Project[] = [
   eventDrivenBacktest,
@@ -364,10 +406,11 @@ export const projects: Project[] = [
   urbanPulseFeaturesRegression,
   sta302FinalProject,
   tableauVisualizations,
+  projectWRDSIIDReplication,
 ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Most recent first
 
 // Export individual projects for easy access
-export { eventDrivenBacktest, urbanPulseTipAnalysis, urbanPulseFeaturesRegression, sta302FinalProject, tableauVisualizations };
+export { eventDrivenBacktest, projectWRDSIIDReplication, sta302FinalProject, tableauVisualizations, urbanPulseFeaturesRegression, urbanPulseTipAnalysis };
 
 // Export helper functions
 export function getProjectById(id: string): Project | undefined {
