@@ -477,6 +477,327 @@ def shuffle_y_within_split(y, groups=None, random_state=None):
   date: '2024-02-11',   // TODO: add date
 };
 
+const monteCarloPermutationTestTimeSeriesAnalysis: Project = {
+  id: 'monte-carlo-permutation-test-time-series-analysis',
+  title: 'Monte Carlo Permutation Test for Binary Time Series Classification: Evaluating Type I Error and Local Power Under Feature Correlation and Non-Stationarity',
+  shortDescription: 'A modular research pipeline simulating 25,000+ GLARMA(1,1) observations to evaluate permutation test reliability, comparing custom implementation against scikit-learn across autocorrelated and non-stationary conditions.',
+  detailedDescription: `**Project Overview**
+This empirical study assessed how autocorrelation and non-stationarity in time series features affect the Monte Carlo permutation test's performance in terms of Type I error control and local power. The research pipeline simulated binomial GARMA(1,1) processes with a logit link, generating synthetic data with controlled AR and MA parameters across 500 replicates with 500 permutations each. A custom permutation test implementation was built from the ground up based on the original methodological paper.
+
+**Methodology**
+The simulation generated ARMA processes using statsmodels, then injected correlated noise via a covariance matrix with decay structure \`Corr[i, j] = rho^|i - j|\`. A linear predictor was constructed by multiplying ARMA processes with beta weights (0 for null, 0.2, 0.4, 0.8 for power analysis), transformed via logistic function, and sampled to produce binary responses. The custom permutation test implementation was validated against scikit-learn's built-in permutation test functionality.
+
+**Key Findings**
+The existing scikit-learn implementation failed to control Type I error across all beta=0 scenarios, including pure noise, autocorrelated features, and multiple correlated features. In contrast, the custom implementation—built from the original paper's specification—successfully controlled Type I error across all null scenarios. For local power analysis, the custom test demonstrated appropriate sensitivity when beta > 0. However, the statistical test began to lose validity under non-stationary conditions (AR component ≥ 1.0), where rejection rates deviated from expected levels.
+
+**Technical Implementation**
+The pipeline was implemented in Python using joblib.Parallel with delayed for high-level parallelization across replicates. Custom permutation test modules replaced scikit-learn's implementation, providing granular control over CV splits, score aggregation, and p-value calculation. Models included XGBoost and logistic regression from scikit-learn, with ARMA processes generated via statsmodels. The implementation avoided oversubscription by moving all parallelization to the highest level of the experimental design.
+
+**Impact**
+The study revealed that scikit-learn's permutation test implementation exhibited systematic Type I error inflation in time series contexts. The custom implementation resolved these issues for stationary data but identified fundamental limitations of permutation testing under non-stationarity. These findings inform appropriate usage of permutation tests for financial and temporal datasets where stationarity assumptions may be violated.`,
+  tags: ['Quantitative Research', 'Data Science (ML)', 'Data Analysis'],
+  images: [
+    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509141221.png"),
+    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509141040.png"),
+    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509141027.png"),
+    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509133417.png"),
+    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509133408.png"),
+    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509133353.png"),
+    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509133347.png"),
+    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509133240.png"),
+    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509133125.png"),
+    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509133114.png"),
+  ],
+  codeSnippets: [
+    `
+    import polars as pl
+
+    # Randomness Control
+    RANDOM_SEED = 42
+    np.random.seed(RANDOM_SEED)
+    master_random_state = check_random_state(RANDOM_SEED)
+
+    # Simulation Parameters
+    N_OBSERVATIONS  = 25_000 # Time series length (50000)
+    MAX_W_MEAN_DEVIATION = 1000 # NOTE figure out what we want here
+    MAX_Y_MEAN_DEVIATION = 0.45 # NOTE both max deviations are arbitrary, set using discretion in functionality tests.
+    ### if y mean deviates MAX_Y_MEAN_DEVIATION more/less than 0.5
+    ### (perfect class balance), we will not use it
+
+    # Resampling Parameters
+    N_REPLICATES = 500        # Number of experimental replicates (500)
+    N_CV_SPLITS = 5         # Cross-validation folds (5)
+    N_PERMUTATIONS = 500     # Permutation tests (150)
+    N_PARAMETER_SETS = 100   # Hyperparameter configurations (100)
+
+    # Statistical Testing
+    SIGNIFICANCE_LEVEL = 0.05
+
+    # Model and Scorer Parameters
+    CLASSIFIER_MODEL = "xgboost" # some shit, rf, xgboost, logistic_regression
+    CLASSIFIER_SCORER = "neg_log_loss" # some list of scorers, f1_weighted, neg_log_loss
+
+    # Scenarios for Single predictor GARMA
+
+    garma_comp_type1_error = [
+        # type 1 error analysis
+        {"beta": 0.0, "phi": 0.0, "theta": 0.000}, # arma = noise
+        {"beta": 0.0, "phi": 0.0, "theta": 0.001}, # arma = noise
+        {"beta": 0.0, "phi": 0.0, "theta": 0.002}, # arma = noise
+        {"beta": 0.0, "phi": 0.2, "theta": 0.4},
+        {"beta": 0.0, "phi": 0.4, "theta": 0.4},
+        {"beta": 0.0, "phi": 0.6, "theta": 0.4},
+        {"beta": 0.0, "phi": 1.0, "theta": 0.4},
+    ]
+
+    garma_comp_local_power = [
+        # local power analysis
+        {"beta": 0.0, "phi": 0.4, "theta": 0.4},
+        {"beta": 0.05, "phi": 0.4, "theta": 0.4},
+        {"beta": 0.2, "phi": 0.4, "theta": 0.4},
+        {"beta": 0.4, "phi": 0.4, "theta": 0.4},
+        {"beta": 0.8, "phi": 0.4, "theta": 0.4},
+
+        # Non stationary scenarios
+        {"beta": 0.2, "phi": 1.0, "theta": 0.4},
+        {"beta": 0.4, "phi": 1.0, "theta": 0.4},
+        {"beta": 0.6, "phi": 1.0, "theta": 0.4},
+        {"beta": 0.8, "phi": 1.0, "theta": 0.4},
+    ]
+
+    GARMA_COMPONENT_LIST_SINGLE = []
+    for comp in garma_comp_type1_error + garma_comp_local_power:
+        if comp not in GARMA_COMPONENT_LIST_SINGLE:
+            GARMA_COMPONENT_LIST_SINGLE.append(comp)
+
+    `,
+    `
+    def multi_pred_main_logic_loop(scenario_id, garma_multi_pred_config, replicate_id, random_seed) -> dict:
+    within_process_random_state = np.random.RandomState(random_seed)
+
+    purged_kfold = PurgedKFold(n_splits=N_CV_SPLITS, purge_gap = 100)
+
+    # (1) Simulate Scenario
+    multi_pred_garma = simulate_garma_binary_multi_predictor(
+        n_obs = N_OBSERVATIONS,
+        multi_predictor_scenario = garma_multi_pred_config,
+        random_state = within_process_random_state,
+    ).with_columns(
+        pl.lit(scenario_id).alias("scenario_id"),
+        pl.lit(replicate_id).alias("replicate_id")
+    )
+
+    predictors = [col for col in multi_pred_garma.columns if col.startswith("predictor")]
+
+    X = multi_pred_garma.select(predictors)
+    y = multi_pred_garma["y"]
+    w = multi_pred_garma["W_t"]
+
+    # Check for W properties and class balance in y in cross validation
+    if not has_valid_properties_and_balance(
+        w = w,
+        y = y,
+        cv = purged_kfold,
+        max_w_mean_deviation = MAX_W_MEAN_DEVIATION,
+        max_y_mean_deviation = MAX_Y_MEAN_DEVIATION
+        ):
+        permutation_results_df = pl.DataFrame({
+            # results
+            "mean_cv_score_baseline": None, # float
+            "mean_cv_scores_permutations": pl.Series([None] * N_PERMUTATIONS, dtype=pl.Float64),  # list[float]
+            "pvalue": None, # float
+
+            # replicate metadata
+            "replicate_id": replicate_id, # int
+            "has_failed_properties": True, # bool
+            "best_model_oos_score": None, # float
+            "best_model_is_score": None, # float
+
+            # scenario meta data
+            "scenario_id": scenario_id, # int
+        }).with_row_index(name = "permutation_idx")
+
+        # timeseries/scenario metadata
+        timeseries_meta_data_df = get_meta_data_columns_multi_pred_ts_scenario(scenario_time_series=multi_pred_garma)
+        permutation_results_df = permutation_results_df.with_columns(
+            [pl.lit(timeseries_meta_data_df[col].item()).alias(col) for col in timeseries_meta_data_df.columns]
+        )
+
+        # in-replicate model metadata
+        for hyper_parameter_name in PARAM_GRID.keys():
+            permutation_results_df = permutation_results_df.with_columns(
+                pl.lit(None).alias(hyper_parameter_name)
+            )
+
+        return {
+            "permutation_results": permutation_results_df,
+            "simulated_timeseries": multi_pred_garma,
+            "raw": None
+            }
+
+    # (2) randomized for each replicate
+    random_param_set_df = get_random_param_sets(
+        param_grid = PARAM_GRID,
+        number_of_random_sets = N_PARAMETER_SETS,
+        random_state = within_process_random_state,
+    )
+
+    # (3) outer loop, iterate through parameter sets
+    parameter_set_results = []
+    for param_set_row in random_param_set_df.iter_rows(named=True):
+        random_param_set_estimator = make_estimator(
+            estimator_string=CLASSIFIER_MODEL,
+            param_set=param_set_row,
+            random_state=within_process_random_state
+            )
+
+        parameter_set_results.append(
+            score_param_set(
+                cv = purged_kfold,
+                scorer_type=CLASSIFIER_SCORER,
+                estimator = random_param_set_estimator,
+                param_set = param_set_row,
+                X = X,
+                y = y,
+            )
+        )
+
+    # (4) operations to obtain best model params
+    all_param_set_results: pl.DataFrame = pl.concat(parameter_set_results)
+
+    # (4a) get the mean oos_score for each parameter set
+    ### NOTE we group by these instead of parameter_set id to retain the values of the hyper parameters
+    param_oos_scores = all_param_set_results.group_by(PARAM_GRID.keys()).agg(
+        pl.mean("oos_score").alias("mean_oos_score"),
+        pl.mean("is_score").alias("mean_is_score"),
+    )
+
+    best_param_set_row = (
+        param_oos_scores.filter(
+            pl.col("mean_oos_score") == pl.col("mean_oos_score").max()
+        )
+    # in case of tie, take the first row
+    ).head(1) # retain score data
+
+
+    best_param_set = (best_param_set_row
+        # drop scores from hyper parameter data
+        .drop(['mean_oos_score', 'mean_is_score'])
+        # convert each row to dict, since we have one row, we take the first
+        .to_dicts()[0]
+    )
+
+    # call function dynamic unpacking to get best_estimator
+    best_estimator = make_estimator(
+        estimator_string = CLASSIFIER_MODEL,
+        param_set = best_param_set,
+        random_state = within_process_random_state,
+    )
+
+    # (5) Evaluate using MCPT-Yperm, shuffle/random state will be different for each scenario, for each replicate
+    yperm_results = score_model_mcpt(
+        X,
+        y,
+        cv = purged_kfold,
+        scorer_type=CLASSIFIER_SCORER,
+        estimator = best_estimator,
+        number_of_permutations = N_PERMUTATIONS,
+        random_state = within_process_random_state,
+    )
+
+    # (6) aggregate to get Baseline CV score, Average Permutation CV scores
+    mean_cv_score_baseline: float = yperm_results["baseline_score"].mean()
+    mean_cv_scores_permutations: pl.Series = ( # NOTE again 2026, it makes no sense to average this at all
+        yperm_results.group_by("permutation_idx")
+        .agg(pl.col("permutation_scores").mean())
+        ["permutation_scores"]
+        )
+
+    actual_total_permutations=N_PERMUTATIONS * N_CV_SPLITS
+    p_value = (
+            (yperm_results["permutation_scores"] > yperm_results["baseline_score"]).sum() + 1.0
+        ) / (actual_total_permutations + 1)
+
+    # (7) Store results in a dictionary
+    # Note: dataframe will be will automatically be exploded on mean_cv_scores_permutations (list[float])
+    permutation_results_df = pl.DataFrame({
+        # results
+        "mean_cv_score_baseline": mean_cv_score_baseline, # float
+        "mean_cv_scores_permutations": mean_cv_scores_permutations,  # list[float]
+        "pvalue": p_value, # float
+
+        # replicate metadata
+        "replicate_id": replicate_id, # int
+        "has_failed_properties": False, # bool
+        "best_model_oos_score": best_param_set_row["mean_oos_score"].item(), # float
+        "best_model_is_score": best_param_set_row["mean_is_score"].item(), # float
+
+        # scenario metadata
+        "scenario_id": scenario_id, # int
+    }).with_row_index(name = "permutation_idx")
+
+    # timeseries/scenario metadata
+    timeseries_meta_data_df = get_meta_data_columns_multi_pred_ts_scenario(scenario_time_series=multi_pred_garma)
+    permutation_results_df = permutation_results_df.with_columns(
+        [pl.lit(timeseries_meta_data_df[col].item()).alias(col) for col in timeseries_meta_data_df.columns]
+    )
+
+    # in-replicate model metadata
+    for hyper_parameter_name, hyper_param_value in best_param_set.items():
+        permutation_results_df = permutation_results_df.with_columns(
+            pl.lit(hyper_param_value).alias(hyper_parameter_name)
+        )
+
+    ### MAIN RAW YPERM RESULTS DATAFRAME, contains all the info
+    yperm_results_df = yperm_results.with_columns(
+        pl.lit(replicate_id).alias("replicate_id"),
+        pl.lit(scenario_id).alias("scenario_id"),
+        **{hyper_parameter_name: pl.lit(hyper_param_value) for hyper_parameter_name, hyper_param_value in best_param_set.items()}
+    )
+    yperm_results_df = yperm_results_df.with_columns(
+        [pl.lit(timeseries_meta_data_df[col].item()).alias(col) for col in timeseries_meta_data_df.columns]
+    )
+
+    return {
+        "permutation_results": permutation_results_df,
+        "simulated_timeseries": multi_pred_garma,
+        "raw": yperm_results_df,
+        }
+    `,
+    `
+    scenario_replicate_multi_pred_combos = product(enumerate(GARMA_COMPONENT_LIST_MULTI), range(N_REPLICATES))
+    multi_pred_all_results_scenario_replicate = Parallel(n_jobs = -1, backend = "loky")(
+        delayed(multi_pred_main_logic_loop)(
+            scenario_id = scenario_id,
+            garma_multi_pred_config = garma_multi_pred_config,
+            replicate_id = replicate_id,
+            random_seed = master_random_state.randint(0, 2**31 - 1),
+            )
+        for ((scenario_id, garma_multi_pred_config), replicate_id) in scenario_replicate_multi_pred_combos
+    )
+
+    all_permutation_multi_pred_results: pl.DataFrame = pl.concat(
+        [result["permutation_results"] for result in multi_pred_all_results_scenario_replicate]
+    ) # TODO rename this to result dictionary
+
+    # Store all time series replicates and scenarios for future reference
+    all_replicate_multi_pred_ts: pl.DataFrame = pl.concat(
+        [result["simulated_timeseries"] for result in multi_pred_all_results_scenario_replicate]
+    )
+
+    # store raw
+    all_raw_multi_pred_results: pl.DataFrame = pl.concat(
+        [result_dictionary["raw"] for result_dictionary in multi_pred_all_results_scenario_replicate
+        if result_dictionary is not None and result_dictionary.get("raw") is not None]
+    )
+
+    all_raw_multi_pred_results.write_parquet("all_raw_multi_pred_results.parquet")
+    `,
+
+  ],
+  links: [{title: "Paper", url:"http://www.jmlr.org/papers/volume11/ojala10a/ojala10a.pdf"}],  // TODO: add links
+  date: '2025-03-20',   // TODO: add date
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////// EXPORTS //////////////////////////////////////////////////////////
@@ -491,10 +812,18 @@ export const projects: Project[] = [
   tableauVisualizations,
   projectWRDSIIDReplication,
   projectAlphaMCPT,
+  monteCarloPermutationTestTimeSeriesAnalysis,
 ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Most recent first
 
 // Export individual projects for easy access
-export { eventDrivenBacktest, projectAlphaMCPT, projectWRDSIIDReplication, sta302FinalProject, tableauVisualizations, urbanPulseFeaturesRegression, urbanPulseTipAnalysis };
+export {
+    eventDrivenBacktest, monteCarloPermutationTestTimeSeriesAnalysis, projectAlphaMCPT,
+    projectWRDSIIDReplication,
+    sta302FinalProject,
+    tableauVisualizations,
+    urbanPulseFeaturesRegression,
+    urbanPulseTipAnalysis
+};
 
 // Export helper functions
 export function getProjectById(id: string): Project | undefined {
