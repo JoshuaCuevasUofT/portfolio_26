@@ -375,7 +375,7 @@ Modular feature functions compute once per dataset, with results cached for reus
 
 **Impact**
 Strategists now access a robust, production-ready library of 500+ microstructure signals, accelerating research in quantitative finance and algorithmic trading applications.`,
-  tags: ['Data Analysis', 'Quantitative Research'],
+  tags: ['Data Analysis', 'Quantitative Research', 'Data Engineering'],
   images: [getImagePath("/images/projects/wrds_replication/signalreplication_acc.png")],
   codeSnippets: [
     `def lee_ready_tick_test(trades):
@@ -399,6 +399,88 @@ Strategists now access a robust, production-ready library of 500+ microstructure
   date: '2023-11-11',   // TODO: add date
 };
 
+const projectAlphaMCPT: Project = {
+  id: 'within-cv-y-permutation-mcpt',
+  title: 'Within-CV Y-Permutation for Model Validation: MCPT Implementation',
+  shortDescription: 'A Python module implementing a within‑cross‑validation y‑permutation (MCPT) algorithm to validate whether a model detects real signal rather than patterns by chance.',
+  detailedDescription: `**Project Overview**
+This project developed a within‑CV y‑permutation (Monte Carlo Permutation Test) module that preserves the independence of training and testing splits during permutation testing. Standard MCPT algorithms shuffle labels across the entire dataset, causing label leakage between folds and producing artificially optimistic null distributions. The within‑CV approach shuffles y labels separately for each CV split, maintaining the original split structure and class balance.
+
+**Methodology**
+Two computational variations were implemented: n‑computation (fit classifier once per CV split, then permute labels) for speed, and n×p‑computation (fit per split per permutation) for robustness. The module supports stratified K‑Fold cross‑validation to ensure each fold maintains the same class proportion as the full dataset. A critical bug where \`n_jobs > 1\` caused duplicate shuffled datasets was fixed by moving shuffling outside the parallel context to preserve random state across processes.
+
+**Technical Implementation**
+The module was built in Python using Polars DataFrames for efficient data handling and scikit‑learn's model selection tools. The algorithm accepts scoring metrics, number of permutations, random seed, and parallelization parameters. For grouped data, shuffling occurs within each group; otherwise a simple shuffle is applied. The function returns a tuple containing the baseline score and a Polars Series of permutation scores. The implementation includes a demo notebook replicating scikit‑learn's visual outputs and p‑values.
+
+**Key Findings**
+Standard y‑permutation leaks information across train/test splits, producing a null distribution that is artificially optimistic. Within‑CV y‑permutation provides an honest baseline for detecting true signal versus overfitting. Statistical tests (Shapiro‑Wilk, Kolmogorov‑Smirnov, Anderson‑Darling) confirmed that permutation score distributions are normal regardless of visual appearance, with sample size and random seed influencing visual normality. Stratified K‑Fold CV eliminates the need for specialized shuffling because labels are already evenly distributed.
+
+**Impact**
+This module enables more rigorous model validation in machine learning pipelines by ensuring permutation tests respect CV split boundaries. The ability to append new CV splits to an existing LazyFrame after initial p‑value calculation adds flexibility for iterative analysis.`,
+  tags: ['Data Science (ML)', 'Quantitative Research', 'Data Analysis'],
+  images: [
+    getImagePath("public\\images\\projects\\permutation_test_dev\\Pasted image 20260509133917.png"),
+    getImagePath("public\\images\\projects\\permutation_test_dev\\Pasted image 20260509133114.png"),
+    getImagePath("public\\images\\projects\\permutation_test_dev\\Pasted image 20260509133240.png"),
+    getImagePath("public\\images\\projects\\permutation_test_dev\\Pasted image 20260509133408.png"),
+    getImagePath("public\\images\\projects\\permutation_test_dev\\Pasted image 20260509133850.png"),
+  ],  // TODO: add images
+  codeSnippets: [
+    `from within_cv_y_perm import within_cv_y_permutation
+import polars as pl
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import StratifiedKFold
+
+# Initialize classifier and CV splitter
+clf = RandomForestClassifier(random_state=42)
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+# Run within-CV y-permutation test
+baseline_score, perm_scores = within_cv_y_permutation(
+    X=X_data,
+    y=y_labels,
+    model=clf,
+    cv=cv,
+    scoring='accuracy',
+    n_permutations=100,
+    random_state=42,
+    n_jobs=4
+)
+
+# perm_scores is a Polars Series of null distribution scores
+print(f"Baseline accuracy: {baseline_score:.3f}")
+print(f"Permutation p-value: {(perm_scores >= baseline_score).mean():.3f}")
+`,
+    `# Within-CV shuffle logic preserving split independence
+def shuffle_y_within_split(y, groups=None, random_state=None):
+    """Shuffle y labels within each CV split, not across the entire dataset."""
+    rng = np.random.RandomState(random_state)
+    y_shuffled = y.copy()
+
+    if groups is not None:
+        # Shuffle within each group to preserve stratification
+        for group_id in np.unique(groups):
+            mask = groups == group_id
+            y_shuffled[mask] = rng.permutation(y_shuffled[mask])
+    else:
+        # Simple shuffle without cross-split leakage
+        y_shuffled = rng.permutation(y_shuffled)
+
+    return y_shuffled
+`
+  ],
+  links: [
+    {title:"Github Repo", url:"https://github.com/quantfinancelab/ProjectAlpha/pull/47"},
+    {title:"Paper", url:"https://www.jmlr.org/papers/volume11/ojala10a/ojala10a.pdf"}
+  ],  // TODO: add links
+  date: '2024-02-11',   // TODO: add date
+};
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////// EXPORTS //////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Export array of all projects (chronologically ordered by date)
 export const projects: Project[] = [
   eventDrivenBacktest,
@@ -407,10 +489,11 @@ export const projects: Project[] = [
   sta302FinalProject,
   tableauVisualizations,
   projectWRDSIIDReplication,
+  projectAlphaMCPT,
 ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Most recent first
 
 // Export individual projects for easy access
-export { eventDrivenBacktest, projectWRDSIIDReplication, sta302FinalProject, tableauVisualizations, urbanPulseFeaturesRegression, urbanPulseTipAnalysis };
+export { eventDrivenBacktest, projectAlphaMCPT, projectWRDSIIDReplication, sta302FinalProject, tableauVisualizations, urbanPulseFeaturesRegression, urbanPulseTipAnalysis };
 
 // Export helper functions
 export function getProjectById(id: string): Project | undefined {
