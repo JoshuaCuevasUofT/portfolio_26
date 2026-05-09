@@ -479,7 +479,7 @@ def shuffle_y_within_split(y, groups=None, random_state=None):
 
 const monteCarloPermutationTestTimeSeriesAnalysis: Project = {
   id: 'monte-carlo-permutation-test-time-series-analysis',
-  title: 'Monte Carlo Permutation Test for Binary Time Series Classification: Evaluating Type I Error and Local Power Under Feature Correlation and Non-Stationarity',
+  title: 'An Empirical Study on Scikit Learn MCPT Type 1 Error and Local Power Compared to Personal Implementation',
   shortDescription: 'A modular research pipeline simulating 25,000+ GLARMA(1,1) observations to evaluate permutation test reliability, comparing custom implementation against scikit-learn across autocorrelated and non-stationary conditions.',
   detailedDescription: `**Project Overview**
 This empirical study assessed how autocorrelation and non-stationarity in time series features affect the Monte Carlo permutation test's performance in terms of Type I error control and local power. The research pipeline simulated binomial GARMA(1,1) processes with a logit link, generating synthetic data with controlled AR and MA parameters across 500 replicates with 500 permutations each. A custom permutation test implementation was built from the ground up based on the original methodological paper.
@@ -799,6 +799,90 @@ The study revealed that scikit-learn's permutation test implementation exhibited
   date: '2025-03-20',   // TODO: add date
 };
 
+const jsFeatureAnalysis: Project = {
+  id: 'jane-street-feature-analysis',
+  title: 'Exploratory Analysis of Anonymized Financial Features: Jane Street Market Prediction Dataset',
+  shortDescription: 'An exploratory data analysis of the Jane Street 2020 dataset using entropy, correlation clustering, and IID diagnostics to benchmark feature quality for financial time-series modeling.',
+  detailedDescription: `**Project Overview**
+This project conducted a diagnostic exploratory analysis of the anonymized feature set from the Jane Street Market Prediction 2020 competition. The analysis established a benchmark for assessing feature engineering processes by evaluating cross-sectional properties and temporal stability without building predictive models.
+
+**Methodology**
+The analysis employed multiple statistical and information-theoretic techniques. Shannon entropy and normalized entropy (H / log2(bin count)) measured feature randomness using fixed-width linear binning with 20 bins. Conditional entropy relative to the target variable \`resp\` was computed via joint histograms as \`H(Y|X) = H(X,Y) − H(X)\`. Pearson correlation matrices were transformed into dissimilarity matrices (\`1 − |corr|\`) followed by hierarchical clustering (single linkage) and flat clustering with \`fcluster\`. Autocorrelation was assessed via Ljung–Box tests and partial autocorrelation functions (PACF) estimated through OLS regression on z-scored, daily-averaged series. Temporal distribution drift was evaluated using Kolmogorov–Smirnov (KS) tests across 10 date-bins, with mutual information matrices computed via kNN-based \`mutual_info_regression\` (\`n_neighbors=8\`).
+
+**Key Findings**
+The feature space appeared largely decorrelated—most pairwise mutual information values were zero. However, strongly dependent clusters achieved MI values near 6.0, suggesting redundant measurement of shared latent processes. Features 65–68 exhibited anomalously low average MI but high maximum MI, indicating global independence paired with strong specific relationships. Autocorrelation remained globally tame (PACF bounds between -0.12 and 0.22), though a subset of features showed meaningful AR structure in the first 6–7 lags. Feature indexing revealed meaningful families: features 55–59 and 121–127 formed high-correlation blocks, while the "60s group" displayed higher entropy and lower inter-correlation. Feature 0 (binary, balanced) showed near-perfect normalized entropy and temporal stability.
+
+**Technical Implementation**
+The analysis pipeline was implemented in Python using pandas for correlation (\`.corr(method='pearson')\`), NumPy for histogram-based entropy estimation, SciPy for hierarchical clustering (\`linkage\`), KS tests (\`ks_2samp\`), and Ljung–Box (\`acorr_ljungbox\`), and scikit-learn for mutual information (\`mutual_info_regression\`). CPU/memory logging via \`psutil\` and file logging tracked resource usage. Computation was performed on remote cloud infrastructure (Compute Canada) with a switchable dataset path supporting a 2GB real parquet file. Visual diagnostics included histograms with KDE, boxplots, dendrograms, clustered correlation heatmaps, and feature growth plots.
+
+**Impact**
+The analysis exposed critical diagnostic contradictions: strong visual stationarity conflicted with KS-based distribution drift detection, highlighting that large-sample KS tests guarantee near-zero p-values irrespective of practical effect sizes. Complete-case dropna() removed an entire day (day 294), demonstrating that missing-data handling can dominate temporal stability conclusions. These insights directly informed refinement of the group's feature validation workflows, emphasizing the need for effect-size calibration, multiple-comparison correction, and formal stationarity tests (ADF/KPSS) over purely visual or significance-driven diagnostics.`,
+  tags: ['Data Analysis', 'Quantitative Research'],
+  images: [
+    getImagePath("public\\images\\projects\\js_eda2020\\tf.png"),
+    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_222_0.png"),
+    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_241_0.png"),
+    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_192_0.png"),
+    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_91_3.png"),
+    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_89_3.png"),
+    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_47_0.png"),
+    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_27_3.png"),
+    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_20_31.png"),
+    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_80_1.png"),
+  ],  // TODO: add images
+  codeSnippets: [
+    `
+    from statsmodels.tsa.stattools import pacf
+
+    pacf_dict = {}
+    for column in aggregated_data.columns:
+        if column not in ["date", "obs_per_day"]:
+            series = aggregated_data[column] #.dropna() but there shouldn't be any need.
+            pacf_values = pacf(series, nlags=lag_notebook_param, method='ols')
+            pacf_dict[column] = pacf_values[1:]  # Skip lag 0 (which is always 1)
+
+    pacf_df = pd.DataFrame(pacf_dict, index=[f"Lag {i}" for i in range(1, lag_notebook_param + 1)])
+    pacf_df.head()
+    `,
+    `
+    correlations = data_pandas.corr(method=corr_method, numeric_only=numeric_only, min_periods=min_periods).round(rounding)
+    from scipy.cluster.hierarchy import linkage, dendrogram, fcluster
+    from scipy.spatial.distance import squareform
+
+    # Compute the dissimilarity matrix and linkage matrix
+    dissimilarity = 1 - abs(correlations)
+    linkage_matrix = linkage(squareform(dissimilarity), method='single')
+
+    # Show flattened dissimilarity matrix
+    squareform(dissimilarity)
+    # Clusterize the data
+    labels = fcluster(linkage_matrix, cluster_threshold, criterion=criterion)
+
+    # Show the cluster
+    labels
+    import numpy as np
+
+    # Keep the indices to sort labels
+    labels_order = np.argsort(labels)
+
+    # Build a new dataframe with the sorted columns
+    for idx, i in enumerate(data_pandas.columns[labels_order]):
+        if idx == 0:
+            clustered = pd.DataFrame(data_pandas[i])
+        else:
+            df_to_append = pd.DataFrame(data_pandas[i])
+            clustered = pd.concat([clustered, df_to_append], axis=1)
+    clustered
+    `
+  ],
+  links: [
+    {title: "Github Repo", url:"https://github.com/Gliese-Group/Empirical-Research/pull/9"},
+    {title: "Kaggle", url: "https://www.kaggle.com/competitions/jane-street-market-prediction"}
+  ],
+  date: '2025-02-21',
+};
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////// EXPORTS //////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -813,11 +897,12 @@ export const projects: Project[] = [
   projectWRDSIIDReplication,
   projectAlphaMCPT,
   monteCarloPermutationTestTimeSeriesAnalysis,
+  jsFeatureAnalysis,
 ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Most recent first
 
 // Export individual projects for easy access
 export {
-    eventDrivenBacktest, monteCarloPermutationTestTimeSeriesAnalysis, projectAlphaMCPT,
+    eventDrivenBacktest, jsFeatureAnalysis, monteCarloPermutationTestTimeSeriesAnalysis, projectAlphaMCPT,
     projectWRDSIIDReplication,
     sta302FinalProject,
     tableauVisualizations,
