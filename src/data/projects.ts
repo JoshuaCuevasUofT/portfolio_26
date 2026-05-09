@@ -419,12 +419,12 @@ Standard y‑permutation leaks information across train/test splits, producing a
 This module enables more rigorous model validation in machine learning pipelines by ensuring permutation tests respect CV split boundaries. The ability to append new CV splits to an existing LazyFrame after initial p‑value calculation adds flexibility for iterative analysis.`,
   tags: ['Data Science (ML)', 'Quantitative Research', 'Data Analysis'],
   images: [
-    getImagePath("public\\images\\projects\\permutation_test_dev\\Pasted image 20260509133917.png"),
-    getImagePath("public\\images\\projects\\permutation_test_dev\\Pasted image 20260509133027.png"),
-    getImagePath("public\\images\\projects\\permutation_test_dev\\Pasted image 20260509133114.png"),
-    getImagePath("public\\images\\projects\\permutation_test_dev\\Pasted image 20260509133240.png"),
-    getImagePath("public\\images\\projects\\permutation_test_dev\\Pasted image 20260509133408.png"),
-    getImagePath("public\\images\\projects\\permutation_test_dev\\Pasted image 20260509133850.png"),
+    getImagePath("/images/projects/permutation_test_dev/Pasted image 20260509133917.png"),
+    getImagePath("/images/projects/permutation_test_dev/Pasted image 20260509133027.png"),
+    getImagePath("/images/projects/permutation_test_dev/Pasted image 20260509133114.png"),
+    getImagePath("/images/projects/permutation_test_dev/Pasted image 20260509133240.png"),
+    getImagePath("/images/projects/permutation_test_dev/Pasted image 20260509133408.png"),
+    getImagePath("/images/projects/permutation_test_dev/Pasted image 20260509133850.png"),
   ],  // TODO: add images
   codeSnippets: [
     `from within_cv_y_perm import within_cv_y_permutation
@@ -497,16 +497,16 @@ The pipeline was implemented in Python using joblib.Parallel with delayed for hi
 The study revealed that scikit-learn's permutation test implementation exhibited systematic Type I error inflation in time series contexts. The custom implementation resolved these issues for stationary data but identified fundamental limitations of permutation testing under non-stationarity. These findings inform appropriate usage of permutation tests for financial and temporal datasets where stationarity assumptions may be violated.`,
   tags: ['Quantitative Research', 'Data Science (ML)', 'Data Analysis'],
   images: [
-    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509141221.png"),
-    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509141040.png"),
-    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509141027.png"),
-    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509133417.png"),
-    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509133408.png"),
-    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509133353.png"),
-    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509133347.png"),
-    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509133240.png"),
-    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509133125.png"),
-    getImagePath("public\\images\\projects\\empirical_study_mcpt\\Pasted image 20260509133114.png"),
+    getImagePath("/images/projects/empirical_study_mcpt/Pasted image 20260509141221.png"),
+    getImagePath("/images/projects/empirical_study_mcpt/Pasted image 20260509141040.png"),
+    getImagePath("/images/projects/empirical_study_mcpt/Pasted image 20260509141027.png"),
+    getImagePath("/images/projects/empirical_study_mcpt/Pasted image 20260509133417.png"),
+    getImagePath("/images/projects/empirical_study_mcpt/Pasted image 20260509133408.png"),
+    getImagePath("/images/projects/empirical_study_mcpt/Pasted image 20260509133353.png"),
+    getImagePath("/images/projects/empirical_study_mcpt/Pasted image 20260509133347.png"),
+    getImagePath("/images/projects/empirical_study_mcpt/Pasted image 20260509133240.png"),
+    getImagePath("/images/projects/empirical_study_mcpt/Pasted image 20260509133125.png"),
+    getImagePath("/images/projects/empirical_study_mcpt/Pasted image 20260509133114.png"),
   ],
   codeSnippets: [
     `
@@ -819,16 +819,16 @@ The analysis pipeline was implemented in Python using pandas for correlation (\`
 The analysis exposed critical diagnostic contradictions: strong visual stationarity conflicted with KS-based distribution drift detection, highlighting that large-sample KS tests guarantee near-zero p-values irrespective of practical effect sizes. Complete-case dropna() removed an entire day (day 294), demonstrating that missing-data handling can dominate temporal stability conclusions. These insights directly informed refinement of the group's feature validation workflows, emphasizing the need for effect-size calibration, multiple-comparison correction, and formal stationarity tests (ADF/KPSS) over purely visual or significance-driven diagnostics.`,
   tags: ['Data Analysis', 'Quantitative Research'],
   images: [
-    getImagePath("public\\images\\projects\\js_eda2020\\tf.png"),
-    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_222_0.png"),
-    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_241_0.png"),
-    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_192_0.png"),
-    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_91_3.png"),
-    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_89_3.png"),
-    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_47_0.png"),
-    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_27_3.png"),
-    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_20_31.png"),
-    getImagePath("public\\images\\projects\\js_eda2020\\js_master_eda_80_1.png"),
+    getImagePath("/images/projects/js_eda2020/tf.png"),
+    getImagePath("/images/projects/js_eda2020/js_master_eda_222_0.png"),
+    getImagePath("/images/projects/js_eda2020/js_master_eda_241_0.png"),
+    getImagePath("/images/projects/js_eda2020/js_master_eda_192_0.png"),
+    getImagePath("/images/projects/js_eda2020/js_master_eda_91_3.png"),
+    getImagePath("/images/projects/js_eda2020/js_master_eda_89_3.png"),
+    getImagePath("/images/projects/js_eda2020/js_master_eda_47_0.png"),
+    getImagePath("/images/projects/js_eda2020/js_master_eda_27_3.png"),
+    getImagePath("/images/projects/js_eda2020/js_master_eda_20_31.png"),
+    getImagePath("/images/projects/js_eda2020/js_master_eda_80_1.png"),
   ],  // TODO: add images
   codeSnippets: [
     `
