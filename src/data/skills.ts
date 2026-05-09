@@ -13,6 +13,7 @@ export const skills: Skill[] = [
   { name: 'JavaScript', icon: 'FaJs', category: 'Languages' },
   { name: 'HTML', icon: 'FaHtml5', category: 'Languages' },
   { name: 'CSS', icon: 'FaCss3Alt', category: 'Languages' },
+  { name: 'Rust', icon: 'SiRust', category: 'Languages' }, // Added Rust
 
   // Libraries/Frameworks
   { name: 'Pandas', icon: 'SiPandas', category: 'Libraries/Frameworks' },
@@ -20,6 +21,7 @@ export const skills: Skill[] = [
   { name: 'scikit-learn', icon: 'SiScikitlearn', category: 'Libraries/Frameworks' },
   { name: 'TensorFlow', icon: 'SiTensorflow', category: 'Libraries/Frameworks' },
   { name: 'PyTorch', icon: 'SiPytorch', category: 'Libraries/Frameworks' },
+  { name: 'Polars', icon: 'SiPolars', category: 'Libraries/Frameworks' }, // Added Polars
   { name: 'React', icon: 'FaReact', category: 'Libraries/Frameworks' },
   { name: 'Vue.js', icon: 'FaVuejs', category: 'Libraries/Frameworks' },
   { name: 'Node.js', icon: 'FaNodeJs', category: 'Libraries/Frameworks' },
@@ -30,6 +32,8 @@ export const skills: Skill[] = [
   { name: 'Git', icon: 'FaGitAlt', category: 'Tools' },
   { name: 'Docker', icon: 'FaDocker', category: 'Tools' },
   { name: 'AWS', icon: 'FaAws', category: 'Tools' },
+  { name: 'Azure', icon: 'FaMicrosoft', category: 'Tools' }, // Use FaMicrosoft instead
+  { name: 'DuckDB', icon: 'SiDuckdb', category: 'Tools' }, // Added DuckDB
   { name: 'Tableau', icon: 'FaChartBar', category: 'Tools' },
   { name: 'Power BI', icon: 'FaChartPie', category: 'Tools' },
   { name: 'Jupyter', icon: 'SiJupyter', category: 'Tools' },

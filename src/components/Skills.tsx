@@ -1,8 +1,8 @@
 import React from 'react';
-import { skills } from '../data/skills';
-import Text from './Text';
 import * as FaIcons from 'react-icons/fa';
 import * as SiIcons from 'react-icons/si';
+import { skills } from '../data/skills';
+import Text from './Text';
 
 // Map icon strings to actual icon components
 const iconMap: Record<string, React.ComponentType> = {
@@ -23,6 +23,8 @@ const iconMap: Record<string, React.ComponentType> = {
   FaChartBar: FaIcons.FaChartBar,
   FaChartPie: FaIcons.FaChartPie,
   FaCode: FaIcons.FaCode,
+  FaMicrosoft: FaIcons.FaMicrosoft,
+
 
   // Si icons
   SiTypescript: SiIcons.SiTypescript,
@@ -31,11 +33,14 @@ const iconMap: Record<string, React.ComponentType> = {
   SiScikitlearn: SiIcons.SiScikitlearn,
   SiTensorflow: SiIcons.SiTensorflow,
   SiPytorch: SiIcons.SiPytorch,
+  SiPolars: SiIcons.SiPolars, // Added for Polars
   SiExpress: SiIcons.SiExpress,
   SiJupyter: SiIcons.SiJupyter,
   SiFigma: SiIcons.SiFigma,
   SiPostgresql: SiIcons.SiPostgresql,
   SiMongodb: SiIcons.SiMongodb,
+  SiRust: SiIcons.SiRust, // Added for Rust
+  SiDuckdb: SiIcons.SiDuckdb, // Added for DuckDB
 };
 
 const Skills: React.FC = () => {
