@@ -882,6 +882,69 @@ The analysis exposed critical diagnostic contradictions: strong visual stationar
   date: '2025-02-21',
 };
 
+const projectWrdsFinancialRatioEda: Project = {
+  id: 'wrds-financial-ratio-eda',
+  title: 'Exploratory Data Analysis of WRDS Financial Ratios: Temporal Dynamics and Feature Dependencies',
+  shortDescription: 'Analyzed monthly financial ratios from Compustat, CRSP, and IBES to evaluate feature distributions, autocorrelation structures, and stationarity across fiscal quarters.',
+  detailedDescription: `**Project Overview**
+This project performed an extensive exploratory data analysis on WRDS financial ratios spanning multiple decades. The dataset integrated accounting data from Compustat, market data from CRSP, and analyst forecasts from IBES. The analysis focused on understanding how financial ratios change over time, their autocorrelation properties, and feature dependencies across approximately 70 financial metrics.
+
+**Methodology**
+Data cleaning addressed several challenges including irregular reporting intervals (quarterly vs. monthly updates), missing values, and survivorship bias concerns. Financial ratios exhibited extreme tail values due to fractional properties, requiring careful outlier handling. The analysis employed autocorrelation functions (ACF), partial autocorrelation functions (PACF), mutual information (MI) estimation, and Kolmogorov-Smirnov (KS) tests for stationarity. Dissimilarity matrices used \`1 - |correlation|\` with complete linkage clustering.
+
+**Key Findings**
+- Feature distributions showed multimodality and lacked clear central tendency; \`bm\` and \`evm\` displayed higher kurtosis than other features.
+- Three distinct groups emerged: quarterly-updating ratios with autocorrelation spikes at lag 3, more frequently updating ratios with no quarterly pattern, and mixed-behavior ratios.
+- Global autocorrelation remained bounded between -0.07 and 0.22 at lag 22, with PACF values between -0.12 and 0.22 across all lags.
+- The feature space lacked clean separability; clustered and unclustered heatmaps appeared visually similar, indicating overlapping relationships.
+- \`CAPEI\` and \`evm\` showed the lowest average pairwise mutual information, suggesting high independence from other features.
+- Most features failed to reject the KS test for IID, though average KS scores drifted upward over time, indicating gradual distributional change.
+
+**Technical Implementation**
+Analysis used Python with pandas for handling monthly panel data, scipy.stats for ACF/PACF and KS tests, scikit-learn for mutual information estimation, and seaborn/matplotlib for visualizations. Data was aggregated on fiscal quarter dates (\`qdate\`) with careful attention to the 2-month reporting lag built into WRDS data updates.
+
+**Impact**
+The analysis revealed that WRDS monthly financial ratios contain distinct temporal structures requiring different handling strategies. Findings informed downstream modeling decisions, particularly the need to treat quarterly-updating ratios separately from high-frequency metrics. The identified feature dependencies and stationarity properties provide a foundation for time-series forecasting and factor model development.`,
+  tags: ['Data Analysis', 'Quantitative Research'],
+  images: [
+    getImagePath("/images/projects/wrds_fr_eda/15.png"),
+    getImagePath("/images/projects/wrds_fr_eda/1.png"),
+    getImagePath("/images/projects/wrds_fr_eda/2.png"),
+    getImagePath("/images/projects/wrds_fr_eda/3.png"),
+    getImagePath("/images/projects/wrds_fr_eda/4.png"),
+    getImagePath("/images/projects/wrds_fr_eda/5.png"),
+    getImagePath("/images/projects/wrds_fr_eda/11.png"),
+    getImagePath("/images/projects/wrds_fr_eda/12.png"),
+    getImagePath("/images/projects/wrds_fr_eda/13.png"),
+    getImagePath("/images/projects/wrds_fr_eda/14.png"),
+  ],
+  codeSnippets: [
+    `import pandas as pd
+import numpy as np
+from scipy.stats import ks_2samp
+from scipy.signal import correlate
+
+# Calculate autocorrelation for a given financial ratio by permno
+def compute_autocorrelation(df, ratio_col, max_lag=30):
+    acf_results = {}
+    for permno in df['permno'].unique():
+        series = df[df['permno'] == permno][ratio_col].dropna()
+        if len(series) > max_lag:
+            acf = [series.autocorr(lag) for lag in range(max_lag)]
+            acf_results[permno] = acf
+    return pd.DataFrame(acf_results).T
+
+# Aggregate quarterly-updating ratios with proper lag alignment
+def align_fiscal_quarters(df, qdate_col='qdate', public_col='public_date'):
+    df['qdate'] = pd.to_datetime(df[qdate_col])
+    df['public_date'] = pd.to_datetime(df[public_col])
+    df['fiscal_year_quarter'] = df['qdate'].dt.to_period('Q')
+    return df.groupby(['permno', 'fiscal_year_quarter']).agg('last').reset_index()`
+  ],
+  links: [],  // TODO: add links
+  date: '2025-03-03',   // TODO: add date
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////// EXPORTS //////////////////////////////////////////////////////////
@@ -898,12 +961,13 @@ export const projects: Project[] = [
   projectAlphaMCPT,
   monteCarloPermutationTestTimeSeriesAnalysis,
   jsFeatureAnalysis,
+  projectWrdsFinancialRatioEda,
+
 ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Most recent first
 
 // Export individual projects for easy access
 export {
-    eventDrivenBacktest, jsFeatureAnalysis, monteCarloPermutationTestTimeSeriesAnalysis, projectAlphaMCPT,
-    projectWRDSIIDReplication,
+    eventDrivenBacktest, jsFeatureAnalysis, monteCarloPermutationTestTimeSeriesAnalysis, projectAlphaMCPT, projectWrdsFinancialRatioEda, projectWRDSIIDReplication,
     sta302FinalProject,
     tableauVisualizations,
     urbanPulseFeaturesRegression,
