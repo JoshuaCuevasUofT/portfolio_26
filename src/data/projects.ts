@@ -945,6 +945,268 @@ def align_fiscal_quarters(df, qdate_col='qdate', public_col='public_date'):
   date: '2025-03-03',   // TODO: add date
 };
 
+const empiricalStudyFeatureImportanceTimeseries: Project = {
+  id: 'empirical-study-feature-importance-timeseries',
+  title: 'Empirical Evaluation of Feature Importance Methods on Autocorrelated and Non-Stationary Time Series Data',
+  shortDescription: 'Evaluated KernelSHAP, TreeSHAP, and LIME on synthetic ARMA data and real-world financial microstructure data to assess feature importance method effectiveness under autocorrelation, non-stationarity, and complex correlation structures.',
+  detailedDescription: `**Project Overview**
+This empirical study evaluated the effectiveness of feature importance methods—KernelSHAP, TreeSHAP, and LIME—on time series classification tasks with binary responses. The investigation progressed from controlled synthetic datasets to real-world financial data, examining how autocorrelation, non-stationarity, and feature correlation structures affect feature selection accuracy.
+
+**Methodology**
+The study employed XGBoost as the base model across all experiments. Synthetic ARMA datasets were generated using statsmodels with controlled AR and MA parameters, combined with logistic functions to produce binary labels based on beta-weighted feature relationships. Correlation experiments applied Cholesky transformation to create controlled covariance structures. Real-world validation used WRDS microstructure data and the JaneStreet 2020 dataset. Preprocessing included null filling with zeros, variance filtering (>0.1), and log difference transformations where applicable.
+
+**Key Findings**
+Synthetic experiments demonstrated that feature importance methods accurately assess feature-label relationships in IID settings. Positive correlation between features caused score splitting (one feature increased, one decreased), while negative correlation drastically reduced both features' importance scores. On JaneStreet 2020, raw features produced consistent IS/OOS results across normal, skewed, and extremely skewed beta-weighted feature sets. WRDS microstructure data required log difference transformations before feature importance methods produced stable results comparable to JaneStreet benchmarks.
+
+**Technical Implementation**
+The evaluation framework used 5 cross-validation splits with purging (100 observations gap between training and validation). Random search was performed across 100 replicates per dataset. Feature importance scores were aggregated as mean absolute values across all observations. SHAP computations used the TreeExplainer for XGBoost, while LIME employed the LimeTabularExplainer with default parameters.
+
+**Impact**
+The study established that log difference transformations effectively prepare microstructure financial data for feature importance analysis, closing the gap between synthetic and real-world performance. Findings provide practical guidance for practitioners applying global interpretation methods to autocorrelated or non-stationary financial time series.`,
+  tags: ['Data Science (ML)', 'Quantitative Research', 'Data Analysis'],
+  images: [
+    getImagePath("/images/projects/esfits/2.png"),
+    getImagePath("/images/projects/esfits/1.png"),
+    getImagePath("/images/projects/esfits/3.png"),
+    getImagePath("/images/projects/esfits/4.png"),
+  ],  // TODO: add images
+  codeSnippets: [
+    `
+    def synthetic_data_main_logic_loop(
+    replicate_id: int, # scenario ID doesn't really make sense... Unless we're going crazy.
+    feature_importance_method: Literal["interventional", "path_dependent"],
+    garma_multi_pred_config: dict,
+    random_seed: int,
+    cv,
+) -> pl.DataFrame:
+    """ Main logic loop for simulating single predictor GARMA time series and evaluating models on YPermutation test.
+    """
+    within_process_random_state = np.random.RandomState(random_seed)
+
+    # (1) Simulate Scenario
+    multi_pred_garma = simulate_garma_binary_multi_predictor(
+        n_obs = N_OBSERVATIONS,
+        multi_predictor_scenario = garma_multi_pred_config,
+        random_state = within_process_random_state,
+    ).with_columns(
+        pl.lit(replicate_id).alias("replicate_id")
+    )
+
+    predictors = [col for col in multi_pred_garma.columns if "predictor" in col]
+
+    X = multi_pred_garma.select(predictors)
+    y = multi_pred_garma["y"]
+    # w = multi_pred_garma["W_t"]
+    # NOTE leaving out feature properties checker for now we will just test IID beta weighted
+
+    # (1) Get random parameter sets
+    random_param_set_df = get_random_param_sets(
+        param_grid = PARAM_GRID,
+        number_of_random_sets = N_PARAMETER_SETS,
+        random_state = within_process_random_state
+        )
+
+    # (2) outer loop, iterate through parameter sets
+    parameter_set_results = []
+    for param_set_row in random_param_set_df.iter_rows(named=True):
+        random_param_set_estimator = make_estimator(
+            estimator_string = CLASSIFIER_MODEL,
+            param_set = param_set_row,
+            random_state = within_process_random_state
+            )
+
+        parameter_set_results.append(
+            score_param_set(
+                cv = cv,
+                scorer_type = CLASSIFIER_SCORER,
+                estimator = random_param_set_estimator,
+                param_set = param_set_row,
+                X = X,
+                y = y,
+            )
+        )
+
+    # (3) operations to obtain best model params
+    all_param_set_results: pl.DataFrame = pl.concat(parameter_set_results)
+
+    # (3a) get the mean oos_score for each parameter set
+    ### we group by these instead of parameter_set id to retain the values of the hyper parameters
+    param_oos_scores = all_param_set_results.group_by(PARAM_GRID.keys()).agg(
+        pl.mean("oos_score").alias("mean_oos_score"),
+        pl.mean("is_score").alias("mean_is_score"),
+    )
+
+    best_param_set_row = (
+        param_oos_scores.filter(
+            pl.col("mean_oos_score") == pl.col("mean_oos_score").max()
+        )
+    # in case of tie, take the first row
+    ).head(1) # retain score data
+
+    best_param_set = (
+        best_param_set_row
+        # drop scores from hyper parameter data
+        .drop(['mean_oos_score', 'mean_is_score'])
+        # convert each row to dict, since we have one row, we take the first
+        .to_dicts()[0]
+    )
+
+    # call function dynamic unpacking to get best_estimator
+    best_estimator = make_estimator(
+        estimator_string = CLASSIFIER_MODEL,
+        param_set = best_param_set,
+        random_state = within_process_random_state,
+    )
+
+    # (4) Evaluate using feature importance methods
+    # cols = features, rows = one global shapley value row for each cv split
+    cv_feature_importance_results = cv_feature_importance(
+        X = X,
+        y = y,
+        cv = cv,
+        estimator = best_estimator, # make dynamic
+        feature_importance_method=feature_importance_method
+    ).with_columns(
+        # NOTE has failed properties for beta weighted features? should be handled researcher side for real data
+        # replicate level meta data
+        pl.lit(replicate_id).alias("replicate_id"),
+        pl.lit(best_param_set_row["mean_oos_score"].item()).alias("best_model_oos_score"),
+        pl.lit(best_param_set_row["mean_is_score"].item()).alias("best_model_is_score"),
+    )
+
+    # in-replicate model metadata
+    for hyper_parameter_name, hyper_param_value in best_param_set.items():
+        cv_feature_importance_results = cv_feature_importance_results.with_columns(
+            pl.lit(hyper_param_value).alias(hyper_parameter_name)
+        )
+
+    return cv_feature_importance_results
+    `,
+    `
+    def real_data_main_logic_loop(
+    replicate_id: int,
+    feature_importance_method: Literal["interventional", "path_dependent"],
+    random_seed: int,
+    feature_df: pl.DataFrame,
+    cv,
+) -> pl.DataFrame:
+    """ Main logic loop for simulating single predictor GARMA time series and evaluating models on YPermutation test.
+    """
+    within_process_random_state = np.random.RandomState(random_seed)
+
+    # (1) Get random parameter sets
+    random_param_set_df = get_random_param_sets(
+        param_grid = PARAM_GRID,
+        number_of_random_sets = N_PARAMETER_SETS,
+        random_state = within_process_random_state
+        )
+
+    # (2) outer loop, iterate through parameter sets
+    parameter_set_results = []
+    for param_set_row in random_param_set_df.iter_rows(named=True):
+        random_param_set_estimator = make_estimator(
+            estimator_string=CLASSIFIER_MODEL,
+            param_set=param_set_row,
+            random_state=within_process_random_state
+            )
+
+        parameter_set_results.append(
+            cv_param_set_with_simulation(
+                cv = cv,
+                scorer_type = CLASSIFIER_SCORER,
+                estimator = random_param_set_estimator,
+                param_set = param_set_row,
+                X = feature_df,
+
+                # transformation params
+                transformation_type = TRANSFORMATION_TYPE,
+                log_shift = LOG_SHIFT,
+                zscore_normalization = ZSCORE_NORMALIZATION_SWITCH,
+                winsorize = WINSORIZE_SWITCH,
+                winsorize_upper_quantile = WINSORIZE_UPPER,
+                winsorize_lower_quantile = WINSORIZE_LOWER,
+                beta_weighted_features = BETA_WEIGHTED_FEATURES,
+
+                # randomness control
+                simulate_y_seed = replicate_id,
+                ### we want the same y labels - simulated across both our cv param set scoring and our feature importance application
+                ### we ensure this seed used to simulate y within cv is the same one used later
+            )
+        )
+
+    # (3) operations to obtain best model params
+    all_param_set_results: pl.DataFrame = pl.concat(parameter_set_results)
+
+    # (3a) get the mean oos_score for each parameter set
+    ### we group by these instead of parameter_set id to retain the values of the hyper parameters
+    param_oos_scores = all_param_set_results.group_by(PARAM_GRID.keys()).agg(
+        pl.mean("oos_score").alias("mean_oos_score"),
+        pl.mean("is_score").alias("mean_is_score"),
+    )
+
+    best_param_set_row = (
+        param_oos_scores.filter(
+            pl.col("mean_oos_score") == pl.col("mean_oos_score").max()
+        )
+    # in case of tie, take the first row
+    ).head(1) # retain score data
+
+    best_param_set = (best_param_set_row
+        # drop scores from hyper parameter data
+        .drop(['mean_oos_score', 'mean_is_score'])
+        # convert each row to dict, since we have one row, we take the first
+        .to_dicts()[0]
+    )
+    # call function dynamic unpacking to get best_estimator
+    best_estimator = make_estimator(
+        estimator_string = CLASSIFIER_MODEL,
+        param_set = best_param_set,
+        random_state = within_process_random_state,
+    )
+
+    # (4) Evaluate using feature importance methods
+    # cols = features, rows = one global shapley value row for each cv split
+    cv_feature_importance_results = cv_feature_importance_with_simulation(
+        X = feature_df,
+        cv = cv,
+        estimator = best_estimator,
+        feature_importance_method=feature_importance_method,
+
+        # transformation params
+        transformation_type = TRANSFORMATION_TYPE,
+        log_shift = LOG_SHIFT,
+        zscore_normalization = ZSCORE_NORMALIZATION_SWITCH,
+        winsorize = WINSORIZE_SWITCH,
+        winsorize_lower_quantile = WINSORIZE_LOWER,
+        winsorize_upper_quantile = WINSORIZE_UPPER,
+        beta_weighted_features = BETA_WEIGHTED_FEATURES,
+
+        # randomness control
+        simulate_y_seed = replicate_id,
+        random_state = within_process_random_state,
+    ).with_columns(
+        # NOTE has failed properties for beta weighted features should be handled researcher side for real data
+
+        # replicate level meta data
+        pl.lit(replicate_id).alias("replicate_id"),
+        pl.lit(best_param_set_row["mean_oos_score"].item()).alias("best_model_oos_score"),
+        pl.lit(best_param_set_row["mean_is_score"].item()).alias("best_model_is_score"),
+    )
+    for hyper_parameter_name, hyper_param_value in best_param_set.items():
+        cv_feature_importance_results = cv_feature_importance_results.with_columns(
+            pl.lit(hyper_param_value).alias(hyper_parameter_name)
+        )
+
+    return cv_feature_importance_results
+    `
+  ],
+  links: [
+    {title: "Github Repo", url:"https://github.com/Gliese-Group/Gliese-Quantitative-Research/pull/12"},
+    {title: "Paper", url:"https://proceedings.neurips.cc/paper/2017/hash/8a20a8621978632d76c43dfd28b67767-Abstract.html"}
+  ],  // TODO: add links
+  date: '2025-06-05',   // TODO: add date
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////// EXPORTS //////////////////////////////////////////////////////////
@@ -962,12 +1224,13 @@ export const projects: Project[] = [
   monteCarloPermutationTestTimeSeriesAnalysis,
   jsFeatureAnalysis,
   projectWrdsFinancialRatioEda,
+  empiricalStudyFeatureImportanceTimeseries,
 
 ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Most recent first
 
 // Export individual projects for easy access
 export {
-    eventDrivenBacktest, jsFeatureAnalysis, monteCarloPermutationTestTimeSeriesAnalysis, projectAlphaMCPT, projectWrdsFinancialRatioEda, projectWRDSIIDReplication,
+    empiricalStudyFeatureImportanceTimeseries, eventDrivenBacktest, jsFeatureAnalysis, monteCarloPermutationTestTimeSeriesAnalysis, projectAlphaMCPT, projectWrdsFinancialRatioEda, projectWRDSIIDReplication,
     sta302FinalProject,
     tableauVisualizations,
     urbanPulseFeaturesRegression,
