@@ -1251,13 +1251,13 @@ This engine wasn't built in a vacuum. Two non-technical constraints shaped the a
 The debug bundles were a compromise that should have come earlier. Also, I wasted weeks chasing performance improvements that Polars' next release made irrelevant. An internal benchmarking suite (which I eventually built) should have been week 1, not month 4.`,
   tags: ['Data Engineering', 'Quantitative Research', 'Data Science (ML)', 'Data Analysis'],
   images: [
-    getImagePath("public/images/projects/alfina/1.png"),
-    getImagePath("public/images/projects/alfina/3.png"),
-    getImagePath("public/images/projects/alfina/4.png"),
-    getImagePath("public/images/projects/alfina/5.png"),
-    getImagePath("public/images/projects/alfina/6.png"),
-    getImagePath("public/images/projects/alfina/7.png"),
-    getImagePath("public/images/projects/alfina/8.png"),
+    getImagePath("/images/projects/alfina/1.png"),
+    getImagePath("/images/projects/alfina/3.png"),
+    getImagePath("/images/projects/alfina/4.png"),
+    getImagePath("/images/projects/alfina/5.png"),
+    getImagePath("/images/projects/alfina/6.png"),
+    getImagePath("/images/projects/alfina/7.png"),
+    getImagePath("/images/projects/alfina/8.png"),
   ],
   codeSnippets: [
     `# TODO fix this cuz it's all bullshit below lol
