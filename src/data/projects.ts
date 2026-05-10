@@ -1207,6 +1207,107 @@ The study established that log difference transformations effectively prepare mi
   date: '2025-06-05',   // TODO: add date
 };
 
+const alfinaQuantEngine: Project = {
+  id: 'alfina-quant-engine',
+  title: 'Alfina: SaaS Parallelized Modular Quantitative Research Engine',
+  shortDescription: 'Built a Polars-based quant engine with explicit point-in-time semantics, modular researcher workflows, and a proprietary position exit algorithm in Rust that runs in constant memory.',
+  detailedDescription: `**Project Overview**
+The engine decomposes a quantitative researcher's non-linear workflow into five chainable modules: universe filters, signal generation, holding period specification, position exit generation, and metrics collection. Each module operates on dataframes with strict \`as_of_timestamp\` semantics, separating knowledge time from event time to prevent lookahead bias. The architecture prioritizes researcher flexibility without sacrificing performance on 300+ vCPU clusters.
+
+**Why Modules? The Core Insight**
+Most quant engines are monolithic — you feed in a strategy and get a backtest. The problem is that researchers don't think linearly. They jump between signal generation and position sizing, tweak universe filters mid-experiment, and backtrack constantly. The insight was that researchers *already have a mental model* of these stages — they just never wrote it down. Codifying their mental model into modules turned a chaotic process into deterministic software without forcing researchers to think like engineers. This sounds simple in retrospect, but it took weeks of observing researcher behavior to realize the stages weren't arbitrary — they were already there.
+
+**Key Features**
+- **Point-in-time correctness:** Every row carries an \`as_of_timestamp\` independent of \`trade_timestamp\`. Indicators compute only using data with \`trade_timestamp < current_row.as_of_timestamp\`. Corporate actions apply forward-only, never backward-rewritten.
+- **Modular researcher workflow:** Researchers can swap any module (e.g., change signal generator while keeping universe filters) without rebuilding the pipeline. This accelerated experimentation by 5x compared to monolithic backtesters.
+- **Debug bundles:** Each module emits a limited, fixed set of metrics and distributions (not all 60+ columns) — enough to validate hypotheses but avoiding memory explosion. The bundle contents were determined by observing 20+ research sessions and tracking actual column usage (80/20 rule applied).
+- **Proprietary position exit algorithm:** Collapses individual trades into sided bets with changing weights using streaming Polars operations. Runs in linear time with constant memory, enabling 200M-row backtests on a laptop. Decouples exit timing from position sizing — a non-obvious design that simplified both components.
+- **Symbolic Variable Tree (SVT):** A drag-and-drop abstraction layer for statistical transformations and smoothing algorithms. Under the hood, each node compiles to a Polars expression (Rust-driven). Users never see the underlying DSL — they drag "Exponential Moving Average" onto a canvas, connect it to price data, and set a halflife. This made advanced time-series operations accessible to financial analysts without programming backgrounds. The tree structure allows arbitrary composition: e.g., zscore(ewm(returns, 10), 20) without writing a line of code.
+
+**A Concrete Example: Signal Generation Module**
+A researcher testing a momentum signal wants to see: distribution of signal values across assets, correlation between signal and next-period return, and signal stability over time. They don't need to see every intermediate column from universe filtering. The debug bundle for signal generation includes exactly those 3 visualizations — nothing more, nothing less. This constraint was arrived at empirically: I watched researchers debug and noted which plots they actually opened. The rest were noise.
+
+**Methodology**
+- **Excel validation suite:** Spent one month generating small, hand-calculated scenarios (2 assets, 100 ticks, 3 splits) in Excel as ground truth. Wrote Polars unit tests asserting engine output matched Excel calculations. Discovered 11 subtle bugs, including a timestamp timezone issue that only appeared during DST transitions.
+- **Sorting benchmarks at scale:** Benchmarked 4 sorting methods across 10M–500M rows under lazy/eager execution and varying vCPU counts (up to 300+). Found that results from 10M rows inverted at 500M rows. Stopped benchmarking against Pandas and built an internal suite that runs on every Polars upgrade, as the library evolves too quickly for static advice.
+- **Memory vs. speed trade-offs:** Rejected data explosion approaches (turning 1 row per tick into N rows per trade leg) due to RAM constraints on millions of observations. Selected streaming, constant-memory algorithms even when iterative approaches were theoretically simpler.
+
+**Technical Implementation**
+- **Tech stack:** Polars, Apache Arrow, Python, pytest, Excel (for validation), AWS (300+ vCPUs)
+- **Parallelization strategy:** Module boundaries became parallelization boundaries — ran multiple signal generators in parallel across different asset universes. Lazy execution triggered only at module boundaries after optimizing query plans.
+- **Orchestration and scaling:** Backtest jobs run on Kubernetes with KEDA (Kubernetes Event-Driven Autoscaling). When the job queue depth increases, KEDA automatically spins up additional pods up to 300+ vCPUs. When the queue empties, pods scale back down to zero — no wasted cloud spend during idle hours. Result cache lives in a separate Azure database, so repeated backtest runs (e.g., parameter sweeps) return instantly without recomputation.
+- **Researcher visibility compromise:** Full materialization of all intermediate columns would crash the engine. The debug bundle approach (20% of columns covering 80% of debugging needs) was a deliberate trade-off between theoretical ideal (minimal compute) and practical reality (researchers need to inspect).
+
+**Business Constraints (The Unspoken Part)**
+This engine wasn't built in a vacuum. Two non-technical constraints shaped the architecture: First, hosting a SaaS with financial data means navigating data licensing agreements — you can't just resell Bloomberg ticks. Second, building this as a broke graduate student meant prioritizing ruthlessly; features that didn't directly help researchers validate hypotheses were deferred. The module decomposition actually helped here — we could ship a working backtester with only 3 modules and add the rest later without rewriting.
+
+**Impact**
+- Eliminated silent data leakage — the #1 cause of backtest overperformance. No "backtest looks amazing but live trading loses money" scenarios after validation.
+- Enabled 200M-row backtests on a laptop (previously OOM at 5M rows).
+- Module decomposition made unit testing possible for each component independently.
+- Scaled to 300+ vCPUs without rewriting parallelization logic.
+
+**What I'd Do Differently**
+The debug bundles were a compromise that should have come earlier. Also, I wasted weeks chasing performance improvements that Polars' next release made irrelevant. An internal benchmarking suite (which I eventually built) should have been week 1, not month 4.`,
+  tags: ['Data Engineering', 'Quantitative Research', 'Data Science (ML)', 'Data Analysis'],
+  images: [
+    getImagePath("public/images/projects/alfina/1.png"),
+    getImagePath("public/images/projects/alfina/3.png"),
+    getImagePath("public/images/projects/alfina/4.png"),
+    getImagePath("public/images/projects/alfina/5.png"),
+    getImagePath("public/images/projects/alfina/6.png"),
+    getImagePath("public/images/projects/alfina/7.png"),
+    getImagePath("public/images/projects/alfina/8.png"),
+  ],
+  codeSnippets: [
+    `# TODO fix this cuz it's all bullshit below lol
+    import polars as pl
+
+# Point-in-time indicator computation
+def compute_rsi(df: pl.DataFrame, window: int = 14) -> pl.DataFrame:
+    return df.with_columns(
+        pl.col("price").diff().alias("delta")
+    ).with_columns(
+        pl.when(pl.col("as_of_timestamp") > pl.col("trade_timestamp"))
+        .then(pl.col("delta").rolling_mean(window))
+        .otherwise(None)
+        .alias("rsi")
+    )
+
+# Unit test pattern (Excel ground truth)
+def test_rsi_against_excel():
+    excel_expected = pl.read_csv("excel_ground_truth/rsi_scenario_1.csv")
+    engine_output = compute_rsi(load_ticks_with_as_of_timestamp())
+    assert engine_output.select("rsi").equals(excel_expected.select("rsi"))
+    # Found 11 bugs this way, including DST timezone edge case
+`,
+    `# Modular pipeline example (simplified)
+class QuantEngine:
+    def __init__(self, universe, signal_gen, holding_period, exit_gen):
+        self.universe = universe
+        self.signal_gen = signal_gen
+        self.holding_period = holding_period
+        self.exit_gen = exit_gen
+
+    def run(self, data: pl.LazyFrame) -> pl.DataFrame:
+        return (
+            data
+            .pipe(self.universe.filter)
+            .pipe(self.signal_gen.compute)
+            .pipe(self.holding_period.apply)
+            .pipe(self.exit_gen.close_positions)
+            .collect(streaming=True)  # Constant memory
+        )
+`
+  ],
+  links: [
+    {title: "Website", url: "https://alfinatrade.com/"},
+    {title: "LinkedIn", url: "https://ca.linkedin.com/company/alfinatrade"},
+],  // TODO: add links
+  date: '2026-02-03',   // TODO: add date
+};
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////// EXPORTS //////////////////////////////////////////////////////////
@@ -1225,12 +1326,13 @@ export const projects: Project[] = [
   jsFeatureAnalysis,
   projectWrdsFinancialRatioEda,
   empiricalStudyFeatureImportanceTimeseries,
+  alfinaQuantEngine
 
 ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Most recent first
 
 // Export individual projects for easy access
 export {
-    empiricalStudyFeatureImportanceTimeseries, eventDrivenBacktest, jsFeatureAnalysis, monteCarloPermutationTestTimeSeriesAnalysis, projectAlphaMCPT, projectWrdsFinancialRatioEda, projectWRDSIIDReplication,
+    alfinaQuantEngine, empiricalStudyFeatureImportanceTimeseries, eventDrivenBacktest, jsFeatureAnalysis, monteCarloPermutationTestTimeSeriesAnalysis, projectAlphaMCPT, projectWrdsFinancialRatioEda, projectWRDSIIDReplication,
     sta302FinalProject,
     tableauVisualizations,
     urbanPulseFeaturesRegression,
