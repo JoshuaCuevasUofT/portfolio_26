@@ -1307,7 +1307,57 @@ class QuantEngine:
   date: '2026-02-03',   // TODO: add date
 };
 
+const portfolioV2AgenticWorkflow: Project = {
+  id: 'portfolio-v2-agentic-workflow',
+  title: 'Portfolio V2: Agentic Workflow for Automated React Frontend Generation',
+  shortDescription: 'Implemented a multi-agent orchestration system using Claude Code, OpenRouter/DeepSeek, LightLLM, and Sandcastle to build a modern React portfolio site with parallel task execution and automated PR generation.',
+  detailedDescription: `**Project Overview**
+This project designed and executed an agentic workflow to build a React-based developer portfolio from existing markdown project files. The workflow leveraged a stack of agent orchestration tools to automate the migration of content into a structured TypeScript codebase with tag-based filtering and a Vanta.js ocean-themed UI.
 
+**Methodology**
+The workflow was organized sequentially and in parallel using Sandcastle for Docker containerization and git worktree isolation. Sequential issues (e.g., Vite + React setup, theme configuration) were executed first. Parallelizable tasks (e.g., extracting individual project data into \`projects.ts\`, building skill icons, creating contact sections) ran concurrently across up to five Docker containers.
+
+**Technical Implementation**
+Tools included: Claude Code as the primary agent executor, OpenRouter routing to DeepSeek for cost-effective parallel tasks, LightLLM for local model routing and fallback, and Sandcastle for parallel orchestration. A single command (\`sandcastle run --parallel --max-concurrent 5 --issues-from-board kanban.md\`) executed all labeled GitHub issues, generated pull requests, and merged approved changes. Model routing assigned complex architectural decisions to Claude and repetitive extraction tasks to DeepSeek.
+
+**Key Features**
+- Parallel execution of five isolated agents, each modifying separate project data files
+- Automatic PR generation and merge for each completed task
+- LightLLM as a router between Claude Code and OpenRouter endpoints
+- Cost optimization: parallel tasks used DeepSeek, reducing execution cost by ∼80% compared to running all tasks on Claude
+- Night-shift automation: single-command workflow that completed the full site build unattended
+
+**Impact**
+Reduced manual migration time from an estimated 6–8 hours to 30 minutes of human oversight. Enabled safe parallel execution without file collisions, and demonstrated a reusable agentic framework for static site generation from unstructured markdown sources.`,
+  tags: ['Dashboards'],
+  images: [getImagePath("/images/projects/portfolio26/Pasted image 20260429185228.png")],
+  codeSnippets: [
+    `// Sandcastle parallel orchestration example
+import { SandcastleRunner } from '@sandcastle/core';
+import { LightLLMRouter } from 'lightllm';
+
+const workflow = new SandcastleRunner({
+  parallel: true,
+  maxConcurrent: 5,
+  sandbox: true,
+  modelRouter: new LightLLMRouter({
+    complexTasks: 'claude-code',
+    parallelTasks: 'openrouter/deepseek',
+    fallback: 'deepseek'
+  })
+});
+
+const issues = [
+  { id: 'extract-project-1', label: 'parallel', prompt: 'Extract backtesting project...' },
+  { id: 'extract-project-2', label: 'parallel', prompt: 'Extract tip analysis project...' }
+];
+
+await workflow.execute(issues);
+await workflow.autoMergePullRequests();`
+  ],
+  links: [{title: "SandCastle Github", url: "https://github.com/mattpocock/sandcastle"}],  // TODO: add links
+  date: '2026-05-09',   // TODO: add date
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////// EXPORTS //////////////////////////////////////////////////////////
@@ -1326,13 +1376,14 @@ export const projects: Project[] = [
   jsFeatureAnalysis,
   projectWrdsFinancialRatioEda,
   empiricalStudyFeatureImportanceTimeseries,
-  alfinaQuantEngine
+  alfinaQuantEngine,
+  portfolioV2AgenticWorkflow
 
 ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Most recent first
 
 // Export individual projects for easy access
 export {
-    alfinaQuantEngine, empiricalStudyFeatureImportanceTimeseries, eventDrivenBacktest, jsFeatureAnalysis, monteCarloPermutationTestTimeSeriesAnalysis, projectAlphaMCPT, projectWrdsFinancialRatioEda, projectWRDSIIDReplication,
+    alfinaQuantEngine, empiricalStudyFeatureImportanceTimeseries, eventDrivenBacktest, jsFeatureAnalysis, monteCarloPermutationTestTimeSeriesAnalysis, portfolioV2AgenticWorkflow, projectAlphaMCPT, projectWrdsFinancialRatioEda, projectWRDSIIDReplication,
     sta302FinalProject,
     tableauVisualizations,
     urbanPulseFeaturesRegression,
